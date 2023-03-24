@@ -31,17 +31,26 @@ class ProtocolFunctionPTPBase(M1_protocol):
 
 
     def ptpJointParams(self):
-        msg = M1_msg.build_msg(80)
+        """
+        This command is to get the velocity and acceleration of the joint coordinate axes in PTP
+        mode, the issued command packet is shown in Table 68, and the returned command packet
+        is shown in Table 69.
+        """
+        return M1_msg.build_msg(80)
 
     def ptpCoordinateParams(self):
-        msg = M1_msg.build_msg(81)
+        """
+        This command is to set the velocity and acceleration of the Cartesian coordinate axes in
+        PTP mode, the issued command packet is shown in Table 70, and the returned command
+        packet is shown in Table 71.
+        :return:
+        """
+        return M1_msg.build_msg(81)
 
-    def ptpJointParams(self):
-        msg = M1_msg.build_msg(80)
 
     def setPtpJointParams(self,velocity:Velocity,acceleration:Acceleration):
         payload =struct.pack("<ffffffff", velocity.x,velocity.y,velocity.z,velocity.r,acceleration.x,acceleration.y,acceleration.z,acceleration.r)
-        msg = M1_msg.build_msg(80,True,self.isQueued,*payload)
+        return M1_msg.build_msg(80,True,self.isQueued,*payload)
 
     def decode_ptpJointParams(self,msg) -> (Velocity,Acceleration):
         id, write, isqueued, payload = M1_msg.decode_msg(msg)
@@ -52,7 +61,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
 
     def setPtpCoordinateParams(self,velocity_xyz:float,velocity_r:float,acc_xyz:float,acc_r:float):
         payload =struct.pack("<ffff", velocity_xyz,velocity_r,acc_xyz,acc_r)
-        msg = M1_msg.build_msg(80,True,self.isQueued,*payload)
+        msg = M1_msg.build_msg(81,True,self.isQueued,*payload)
 
 
     def decode_ptpCoordinateParams(self,msg) -> (int,int,int,int):
@@ -62,9 +71,46 @@ class ProtocolFunctionPTPBase(M1_protocol):
 
 
     def setPtpCommonParams(self, velocity:float, acceleration:float):
+        """
+        This command is to set the velocity ratio and the acceleration ratio in PTP mode, the issued
+        command packet is shown in Table 78, and the returned command packet is shown in
+        Table 79.
+        Ta
+        :param velocity:
+        :param acceleration:
+        :return:
+        """
         payload =struct.pack("<ff", velocity,  acceleration )
-        msg = M1_msg.build_msg(83,True,self.isQueued,*payload)
+        msg = M1_msg.build_msg(83,True,self.isQueued,payload)
 
 
+    def ptpJumpParams(self) :
+        """
+        float jumpHeight; //Lifting height in Jump mode
+        float zLimit; //Maximum lifting height in Jump mod
+        """
+        return M1_msg.build_msg(82)
+
+    def decode_ptpJumpParams(self,msg) ->(int,int):
+        """
+        float jumpHeight; //Lifting height in Jump mode
+        float zLimit; //Maximum lifting height in Jump mod
+        """
+        id, write, isqueued, payload = M1_msg.decode_msg(msg)
+        jumpHeight,zLimit = struct.unpack("<ff",payload)
+        return jumpHeight,zLimit
+
+    def setPtpJumpParams(self,jumpHeight:float,zLimit:float):
+        """
+        This command is to get the lifting height and the maximum lifting height in JUMP mode,
+        the issued command packet is shown in Table 76, and the returned command packet is
+        shown in Table 77
+        :param jumpHeight:
+        :param zLimit:
+        :return:
+        """
+        payload =struct.pack("<ff", jumpHeight,  zLimit )
+        msg = M1_msg.build_msg(82,True,self.isQueued,payload)
+        return msg
 
 
