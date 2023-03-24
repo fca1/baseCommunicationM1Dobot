@@ -9,7 +9,8 @@ from M1.M1_protocol.ProtocolFunctionEndEffectorBase import ProtocolFunctionEndEf
 from M1.M1_protocol.ProtocolFunctionHHTBase import ProtocolFunctionHHTBase
 from M1.M1_protocol.ProtocolFunctionHOMEBase import ProtocolFunctionHOMEBase
 from M1.M1_protocol.ProtocolFunctionJOGBase import ProtocolFunctionJOGBase
-from M1.M1_protocol.ProtocolFunctionPTPBase import ProtocolFunctionPTPBase
+from M1.M1_protocol.ProtocolFunctionMiscBase import ProtocolFunctionMiscBase
+from M1.M1_protocol.ProtocolFunctionPTPBase import ProtocolFunctionPTPBase, Acceleration, Velocity
 from M1.M1_protocol.ProtocolFunctionPoseBase import ProtocolFunctionPoseBase
 from M1.M1_protocol.ProtocolFunctionQueuedCmdBase import ProtocolFunctionQueuedCmdBase
 from M1.M1_protocol.ProtocolFunctionTRIGBase import ProtocolFunctionTRIGBase
@@ -41,6 +42,7 @@ class ProtocolFunction:
         self.waitBase = ProtocolFunctionWAITBase()
         self.trigBase = ProtocolFunctionTRIGBase()
         self.eioBase = ProtocolFunctionEIOBase()
+        self.miscBase = ProtocolFunctionMiscBase()
 
         pass
 
@@ -59,5 +61,10 @@ class ProtocolFunction:
         msg =  self.comm.cmd(self.alarmBase.status, self.alarmBase.decode_status)
         return not "error" in msg
 
-    def setClearAllAlarmsState(self):
+
+    def setClearAllAlarmsState(self,alarmBase):
         self.comm.cmd(self.alarmBase.clearAllAlarmsState, None)
+
+
+    def setPtpCoordinateParams(self,velocity:Velocity,acc:Acceleration):
+        self.comm.cmd(self.ptpBase.setPtpJointParams())

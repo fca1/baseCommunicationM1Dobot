@@ -35,4 +35,3 @@ class ProtocolFunctionALARMBase(M1_protocol):
         return ""
 
 
-

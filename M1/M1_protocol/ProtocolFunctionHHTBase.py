@@ -7,3 +7,9 @@ class ProtocolFunctionHHTBase(M1_protocol):
 
     def __int__(self):
         super().__init__()
+
+    def setHttTrigOutputEnabled(self,enabled:True):
+        msg = M1_msg.build_msg(251, True, False, bytes((int(enabled,))))
+        return msg
+
+
