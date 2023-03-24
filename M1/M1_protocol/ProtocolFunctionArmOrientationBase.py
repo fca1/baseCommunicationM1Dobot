@@ -21,18 +21,18 @@ class E_ptpMode(Enum):
 
 
 class ProtocolFunctionArmOrientationBase(M1_protocol):
-    def __int__(self):
+    def __init__(self):
         super().__init__()
 
     def setPTPCmd(self,pos:PositionArm,mode:E_ptpMode=E_ptpMode.MOVJ_XYZ) -> bytearray:
         #"aa aa 13 54 03 01 (00 00 2c c3) (00 00 48 42) (00 00 00 10)   25 c3 00 00 c8 42 3d"
 
         datas = struct.pack('<Bffff',mode.value, pos.x, pos.y, pos.z, pos.r)
-        msg = M1_msg.build_msg(0x54,True,self.isQueued, *datas)
+        msg = M1_msg.build_msg(0x54,True,self.isQueued, datas)
         return msg
 
     def setArmOrientation(self,right:bool):
-        msg = M1_msg.build_msg(50, True, self.isQueued,bytes((int(right),)) )
+        return M1_msg.build_msg(50, True, self.isQueued,bytearray((int(right),)) )
 
     def orientation(self):
         return M1_msg.build_msg(0x50)

@@ -7,7 +7,7 @@ from M1.M1_protocol.M1_protocol import M1_protocol
 class ProtocolFunctionPoseBase(M1_protocol):
 
 
-    def __int__(self):
+    def __init__(self):
         super().__init__()
 
 
@@ -23,4 +23,4 @@ class ProtocolFunctionPoseBase(M1_protocol):
 
     def calibrate(self,frontangle1,frontangle2):
         payload=struct.pack("<Bff",1,frontangle1,frontangle2)
-        return M1_msg.build_msg(11,True,False,*payload)
+        return M1_msg.build_msg(11,True,False,payload)

@@ -3,7 +3,7 @@ from M1.M1_protocol.M1_protocol import M1_protocol
 
 
 class ProtocolFunctionEIOBase(M1_protocol):
-    def __int__(self):
+    def __init__(self):
         super().__init__()
 
     def do(self):

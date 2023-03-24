@@ -26,7 +26,7 @@ class Acceleration:
 class ProtocolFunctionPTPBase(M1_protocol):
 
 
-    def __int__(self):
+    def __init__(self):
         super().__init__()
 
 
@@ -41,7 +41,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
 
     def setPtpJointParams(self,velocity:Velocity,acceleration:Acceleration):
         payload =struct.pack("<ffffffff", velocity.x,velocity.y,velocity.z,velocity.r,acceleration.x,acceleration.y,acceleration.z,acceleration.r)
-        msg = M1_msg.build_msg(80,True,self.isQueued,*payload)
+        msg = M1_msg.build_msg(80,True,self.isQueued,payload)
 
     def decode_ptpJointParams(self,msg) -> (Velocity,Acceleration):
         id, write, isqueued, payload = M1_msg.decode_msg(msg)
@@ -52,7 +52,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
 
     def setPtpCoordinateParams(self,velocity_xyz:float,velocity_r:float,acc_xyz:float,acc_r:float):
         payload =struct.pack("<ffff", velocity_xyz,velocity_r,acc_xyz,acc_r)
-        msg = M1_msg.build_msg(80,True,self.isQueued,*payload)
+        msg = M1_msg.build_msg(80,True,self.isQueued,payload)
 
 
     def decode_ptpCoordinateParams(self,msg) -> (int,int,int,int):
@@ -63,7 +63,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
 
     def setPtpCommonParams(self, velocity:float, acceleration:float):
         payload =struct.pack("<ff", velocity,  acceleration )
-        msg = M1_msg.build_msg(83,True,self.isQueued,*payload)
+        return M1_msg.build_msg(83,True,self.isQueued,payload)
 
 
 
