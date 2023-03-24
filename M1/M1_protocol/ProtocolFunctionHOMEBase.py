@@ -1,7 +1,8 @@
 from M1.M1_protocol.M1_msg import M1_msg
+from M1.M1_protocol.M1_protocol import M1_protocol
 
 
-class ProtocolFunctionHOMEBase():
+class ProtocolFunctionHOMEBase(M1_protocol):
 
 
     def __int__(self):
@@ -14,7 +15,7 @@ class ProtocolFunctionHOMEBase():
 
 
     def setHomeSwitch(self,calibrate:bool=False):
-        msg = M1_msg.build_msg(31,True,False,bytes((calibrate,)))
+        msg = M1_msg.build_msg(33,True,self.isQueued,bytes((calibrate,)))
         return msg
 
 

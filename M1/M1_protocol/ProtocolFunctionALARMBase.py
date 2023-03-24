@@ -1,9 +1,10 @@
 import struct
 
 from M1.M1_protocol.M1_msg import M1_msg
+from M1.M1_protocol.M1_protocol import M1_protocol
 
 
-class ProtocolFunctionALARMBase():
+class ProtocolFunctionALARMBase(M1_protocol):
 
 
     def __int__(self):
@@ -15,11 +16,11 @@ class ProtocolFunctionALARMBase():
         msg = M1_msg.build_msg(20,True)
         return msg
 
-    def getStatus(self):
+    def status(self):
         return  M1_msg.build_msg(29)
 
 
-    def decode_getStatus(self,msg):
+    def decode_status(self, msg):
         id,write,isqueued,payload =M1_msg.decode_msg(msg)
         st0,st1,_,_ = struct.unpack("BBBB",payload)
         if st0 & 1:

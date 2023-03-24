@@ -56,7 +56,7 @@ class ProtocolFunction:
 
     @property
     def status_ok(self) ->bool:
-        msg =  self.comm.cmd(self.alarmBase.getStatus, self.alarmBase.decode_getStatus)
+        msg =  self.comm.cmd(self.alarmBase.status, self.alarmBase.decode_status)
         return not "error" in msg
 
     def setClearAllAlarmsState(self):

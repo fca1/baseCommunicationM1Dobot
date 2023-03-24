@@ -2,6 +2,8 @@ import struct
 from enum import Enum, unique
 
 from M1.M1_protocol.M1_msg import M1_msg
+from M1.M1_protocol.M1_protocol import M1_protocol
+from M1.misc.PositionArm import PositionArm
 
 
 @unique
@@ -18,17 +20,23 @@ class E_ptpMode(Enum):
     JUMP_MOVL_XYZ=9 # JUMP mode, (x,y,z,r) is the Cartesian coordinate increment in Cartesian coordinate system
 
 
-class ProtocolFunctionArmOrientationBase():
+class ProtocolFunctionArmOrientationBase(M1_protocol):
     def __int__(self):
         super().__init__()
 
-    @staticmethod
-    def setPTPCmd(x:float,y:float,z:float,r:float,mode:E_ptpMode=E_ptpMode.MOVJ_XYZ,isQueued:bool=False) -> bytearray:
+    def setPTPCmd(self,pos:PositionArm,mode:E_ptpMode=E_ptpMode.MOVJ_XYZ) -> bytearray:
+        #"aa aa 13 54 03 01 (00 00 2c c3) (00 00 48 42) (00 00 00 10)   25 c3 00 00 c8 42 3d"
 
-        "aa aa 13 54 03 01 (00 00 2c c3) (00 00 48 42) (00 00 00 10)   25 c3 00 00 c8 42 3d"
-
-        datas = struct.pack('>Bffff',mode.value, x, y, z, r)
-        msg = M1_msg.build_msg(0x54,True,isQueued, *datas)
+        datas = struct.pack('<Bffff',mode.value, pos.x, pos.y, pos.z, pos.r)
+        msg = M1_msg.build_msg(0x54,True,self.isQueued, *datas)
         return msg
 
+    def setArmOrientation(self,right:bool):
+        msg = M1_msg.build_msg(50, True, self.isQueued,bytes((int(right),)) )
 
+    def orientation(self):
+        return M1_msg.build_msg(0x50)
+
+    def decode_orientation(self,msg):
+        id, write, isqueued, payload = M1_msg.decode_msg(msg)
+        return "right" if payload[0] else "left"

@@ -1,4 +1,4 @@
 
 
-class ProtocolFunctionARCBase:
+class ProtocolFunctionARCBase(M1_protocol):
     pass

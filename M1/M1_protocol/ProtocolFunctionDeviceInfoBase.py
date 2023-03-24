@@ -1,7 +1,7 @@
 from M1.M1_protocol.M1_msg import M1_msg
 
 
-class ProtocolFunctionDeviceInfoBase():
+class ProtocolFunctionDeviceInfoBase(M1_protocol):
 
 
     def __int__(self):
