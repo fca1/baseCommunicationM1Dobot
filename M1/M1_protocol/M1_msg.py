@@ -3,7 +3,8 @@ import struct
 
 class M1_msg:
     """
-    Le dobot M1 utilise le protocole @see 'Dobot M1 Communication Protocol'
+    Le dobot M1 utilise le protocole @see 'Dobot M1 Communication Protocol'.
+    L'octet de controle n'indique pas s'il s'agit de bits ( rw et isQueued), dans le code bit1 et bit0
     """
 
     @staticmethod
@@ -16,7 +17,7 @@ class M1_msg:
     @staticmethod
     def _build_payload(_id: int, write: bool = False, isQueued: bool = False, *params):
         assert _id < 256
-        ctrl = (1 if write else 0) << 4 + (1 if isQueued else 0)
+        ctrl = (1 if write else 0) << 1 + (1 if isQueued else 0)
         payload = bytearray((_id, ctrl, *params))
         return payload
 
@@ -39,4 +40,4 @@ class M1_msg:
             raise Exception("bad length")
         if -(sum(payload)+_id+ctrl) & 0xff != chk:
             raise Exception("bad chk")
-        return _id, (ctrl & 0xf0) >> 4, bool(ctrl & 0x0f), payload
+        return _id, (ctrl & 0x02) >> 1, bool(ctrl & 0x01), payload

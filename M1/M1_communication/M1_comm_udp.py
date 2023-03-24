@@ -2,6 +2,9 @@ import socket
 
 
 class M1_comm_udp:
+    """
+    Le M1 simule la liaison serie a travers une liaison UDP (port) en datagramm
+    """
     def __init__(self,addr:str,port:int=12345):
         self.bufferSize = 1024
         self.m1AddressPort = (addr, port)
