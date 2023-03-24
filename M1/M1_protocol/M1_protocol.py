@@ -5,7 +5,7 @@ from M1.M1_protocol.M1_msg import M1_msg
 
 class M1_protocol:
 
-    def __int__(self):
+    def __init__(self):
         self.isQueued=False
 
     def build_commands(self):
