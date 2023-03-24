@@ -37,6 +37,6 @@ class M1_msg:
         payload = payload_wchk[0:-1]
         if len(payload) != length:
             raise Exception("bad length")
-        if -sum(payload) & 0xff != chk:
+        if -(sum(payload)+_id+ctrl) & 0xff != chk:
             raise Exception("bad chk")
         return _id, (ctrl & 0xf0) >> 4, bool(ctrl & 0x0f), payload

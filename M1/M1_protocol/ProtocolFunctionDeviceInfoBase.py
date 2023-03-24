@@ -1,8 +1,7 @@
 from M1.M1_protocol.M1_msg import M1_msg
-from M1.M1_protocol.ProtocolFunction import ProtocolFunction
 
 
-class ProtocolFunctionDeviceInfoBase(ProtocolFunction):
+class ProtocolFunctionDeviceInfoBase():
 
 
     def __int__(self):
@@ -16,5 +15,5 @@ class ProtocolFunctionDeviceInfoBase(ProtocolFunction):
 
     def decode_deviceSN(self,msg:bytearray):
         id,write,isqueued,payload =M1_msg.decode_msg(msg)
-        return str(payload[:-1])
+        return payload[:-1].decode()
         pass

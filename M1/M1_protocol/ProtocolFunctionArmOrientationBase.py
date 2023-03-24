@@ -2,7 +2,6 @@ import struct
 from enum import Enum, unique
 
 from M1.M1_protocol.M1_msg import M1_msg
-from M1.M1_protocol.ProtocolFunction import ProtocolFunction
 
 
 @unique
@@ -19,7 +18,7 @@ class E_ptpMode(Enum):
     JUMP_MOVL_XYZ=9 # JUMP mode, (x,y,z,r) is the Cartesian coordinate increment in Cartesian coordinate system
 
 
-class ProtocolFunctionArmOrientationBase(ProtocolFunction):
+class ProtocolFunctionArmOrientationBase():
     def __int__(self):
         super().__init__()
 

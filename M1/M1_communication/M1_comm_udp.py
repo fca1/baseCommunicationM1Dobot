@@ -11,3 +11,10 @@ class M1_comm_udp:
         self.client.sendto(bytesToSend, self.m1AddressPort)
         msgFromServer = self.client.recvfrom(self.bufferSize)
         return msgFromServer[0]
+
+    def cmd(self,fcnt:callable,decode:callable,*params):
+        x = fcnt(*params)
+        answer = self.send_msg(x)
+        if decode:
+            return decode(answer)
+        return answer
