@@ -21,6 +21,9 @@ from M1.misc.PositionArm import PositionArm
 
 
 class ProtocolFunction:
+    """
+    La documentation Dobot explique avoir categrisé les fonctions.
+    """
     def __init__(self,comm:M1_comm_udp):
         self.comm = comm
         self.armOrientationBase = ProtocolFunctionArmOrientationBase()
@@ -46,9 +49,10 @@ class ProtocolFunction:
         return self.comm.cmd(self.deviceInfoBase.deviceSN, self.deviceInfoBase.decode_deviceSN)
 
 
-    def getPos(self) -> (PositionArm,AngleArm):
+    def pos(self) -> (PositionArm,AngleArm):
         x,y,z,r,*angle =  self.comm.cmd(self.poseBase.pose, self.poseBase.decode_pose)
         return PositionArm(x,y,z,r), AngleArm(*angle)
+
 
     @property
     def status_ok(self) ->bool:

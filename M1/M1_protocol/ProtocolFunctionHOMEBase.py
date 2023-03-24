@@ -13,4 +13,11 @@ class ProtocolFunctionHOMEBase():
         return msg
 
 
+    def setHomeSwitch(self,calibrate:bool=False):
+        msg = M1_msg.build_msg(31,True,False,bytes((calibrate,)))
+        return msg
+
+
+
+
 
