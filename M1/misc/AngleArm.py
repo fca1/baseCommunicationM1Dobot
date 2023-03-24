@@ -1,7 +1,7 @@
-import dataclasses
+from dataclasses import dataclass
 
 
-@dataclasses
+@dataclass
 class AngleArm:
     base: float
     rear: float

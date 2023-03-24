@@ -1,7 +1,7 @@
-import dataclasses
+from dataclasses import dataclass
 
 
-@dataclasses
+@dataclass
 class PositionArm:
     x:float
     y:float

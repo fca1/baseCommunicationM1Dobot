@@ -44,7 +44,7 @@ class ProtocolFunction:
 
         pass
 
-    @property
+
     def serial(self) ->str:
         return self.comm.cmd(self.deviceInfoBase.deviceSN, self.deviceInfoBase.decode_deviceSN)
 
@@ -59,3 +59,5 @@ class ProtocolFunction:
         msg =  self.comm.cmd(self.alarmBase.getStatus, self.alarmBase.decode_getStatus)
         return not "error" in msg
 
+    def setClearAllAlarmsState(self):
+        self.comm.cmd(self.alarmBase.clearAllAlarmsState, None)

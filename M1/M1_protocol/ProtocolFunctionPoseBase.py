@@ -18,4 +18,4 @@ class ProtocolFunctionPoseBase():
     def decode_pose(self,msg:bytearray):
         id,write,isqueued,payload =M1_msg.decode_msg(msg)
         x,y,z,r,angle_base,angle_rear,angle_form,angle_deflector = struct.unpack(">ffffffff",payload)
-        return x,y,z,r
+        return x,y,z,r,angle_base,angle_rear,angle_form,angle_deflector

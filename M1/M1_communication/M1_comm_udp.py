@@ -15,7 +15,7 @@ class M1_comm_udp:
         msgFromServer = self.client.recvfrom(self.bufferSize)
         return msgFromServer[0]
 
-    def cmd(self,fcnt:callable,decode:callable|None,*params) -> ...:
+    def cmd(self,fcnt:callable,decode:callable,*params) -> ...:
         """
         Le protocole travaille  selon le principe du ping pong
         :param fcnt: Fonction retournant un message bytes
