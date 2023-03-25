@@ -24,7 +24,7 @@ class M1_comm_udp:
         :return: la donnée brute du robot si decode est None sinon variable selon decode.
         """
         msg_or_tuple = fcnt(*params)
-        x,decode_fcnt = msg_or_tuple,None if type(msg_or_tuple) is bytes else msg_or_tuple
+        x,decode_fcnt = (*msg_or_tuple,) if not isinstance(msg_or_tuple,bytes) else (msg_or_tuple,None)
         answer = self.send_msg(x)
         if decode_fcnt:
             return decode_fcnt(answer)

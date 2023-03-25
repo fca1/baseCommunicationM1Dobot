@@ -12,14 +12,14 @@ comm = M1_comm_udp("192.168.0.55")
 protocol = ProtocolFunction(comm)
 assert protocol.serial()
 # Faire un homing
-comm.send_msg(protocol.hhtBase.setHttTrigOutputEnabled(False))
+comm.cmd(protocol.hhtBase.setHttTrigOutputEnabled,False)
 if 0:
-    comm.send_msg(protocol.homeBase.setHome())
+    comm.cmd(protocol.homeBase.setHome)
     while protocol.status=="ran":
         time.sleep(2)
     p0=PositionArm(0,0,230)
     p1=PositionArm(400,0,230)
-    comm.send_msg(protocol.miscBase.setUserFrame(p0, p1))  # user tool
+    comm.cmd(protocol.miscBase.setUserFrame,p0, p1)  # user tool
     pinitial =p1-p0
     pass
 
@@ -27,16 +27,16 @@ if 0:
 #Test sur user position
 p0 = PositionArm(400,0,230)
 p1 = PositionArm(200,0,230)
-comm.send_msg(protocol.miscBase.setUserFrame(p0,p1))  # user tool
+comm.cmd(protocol.miscBase.setUserFrame,p0,p1)  # user tool
 
-comm.send_msg(protocol.armOrientationBase.setArmOrientation(right=False))
+comm.cmd(protocol.armOrientationBase.queued.setArmOrientation,False)
 p0, _ = protocol.pos
-pr = PositionArm(10,0,0,0)
-comm.send_msg(protocol.armOrientationBase.setPTPCmd(pr,E_ptpMode.MOVJ_XYZ_INC))
+pr = PositionArm(100,0,-30,0)
+comm.cmd(protocol.armOrientationBase.setPTPCmd,pr,E_ptpMode.MOVL_XYZ)
 
 
 
-comm.send_msg(protocol.alarmBase.clearAllAlarmsState())
+comm.cmd(protocol.alarmBase.clearAllAlarmsState)
 # Le systeme est communiquant.
 # Couper les moteurs pour faire du teaching
 comm.send_msg(protocol.hhtBase.setHttTrigOutputEnabled(True))

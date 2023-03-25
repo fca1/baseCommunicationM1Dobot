@@ -11,7 +11,7 @@ class M1_msg:
     def _build_msg(payload: bytearray) -> bytearray:
         length = len(payload)
         chksum = -sum(payload) & 0xFF
-        msg = bytearray((0xAA, 0xAA, length, *payload, chksum))
+        msg = bytes((0xAA, 0xAA, length, *payload, chksum))
         return msg
 
     @staticmethod

@@ -6,7 +6,7 @@ from M1.M1_protocol.M1_msg import M1_msg
 class M1_protocol:
 
     def __init__(self):
-        self.isQueued=False
+        self._isQueued=False
 
     def build_commands(self):
         return {}
@@ -20,6 +20,19 @@ class M1_protocol:
             return count
         return None
 
+    @property
+    def queued(self):
+        # l'appel déclenche le set de la variable
+        self._isQueued=True
+        return self
+
+    @property
+    def isQueued(self):
+        # la relire remet a 0
+        try:
+            return self._isQueued
+        finally:
+            self._isQueued=False
 
 
     pass
