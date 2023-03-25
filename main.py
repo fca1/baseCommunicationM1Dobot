@@ -7,14 +7,34 @@ from M1.M1_protocol.ProtocolFunctionArmOrientationBase import E_ptpMode
 from M1.misc.PositionArm import PositionArm
 
 # Initialiser le systeme de communication udp
-Pinitial = PositionArm(400,0,0,0)
+
 comm = M1_comm_udp("192.168.0.55")
 protocol = ProtocolFunction(comm)
 assert protocol.serial()
 # Faire un homing
-comm.send_msg(protocol.hhtBase.setHttTrigOutputEnabled(True))
-comm.send_msg(protocol.homeBase.setHome())
-Pinitial =protocol.pos
+comm.send_msg(protocol.hhtBase.setHttTrigOutputEnabled(False))
+if 0:
+    comm.send_msg(protocol.homeBase.setHome())
+    while protocol.status=="ran":
+        time.sleep(2)
+    p0=PositionArm(0,0,230)
+    p1=PositionArm(400,0,230)
+    comm.send_msg(protocol.miscBase.setUserFrame(p0, p1))  # user tool
+    pinitial =p1-p0
+    pass
+
+
+#Test sur user position
+p0 = PositionArm(400,0,230)
+p1 = PositionArm(200,0,230)
+comm.send_msg(protocol.miscBase.setUserFrame(p0,p1))  # user tool
+
+comm.send_msg(protocol.armOrientationBase.setArmOrientation(right=False))
+p0, _ = protocol.pos
+pr = PositionArm(10,0,0,0)
+comm.send_msg(protocol.armOrientationBase.setPTPCmd(pr,E_ptpMode.MOVJ_XYZ_INC))
+
+
 
 comm.send_msg(protocol.alarmBase.clearAllAlarmsState())
 # Le systeme est communiquant.
