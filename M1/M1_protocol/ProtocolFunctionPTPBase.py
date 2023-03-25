@@ -36,21 +36,21 @@ class ProtocolFunctionPTPBase(M1_protocol):
         mode, the issued command packet is shown in Table 68, and the returned command packet
         is shown in Table 69.
         """
-        return M1_msg.build_msg(80)
+        return M1_msg.build_msg(80,True),self.decode_ptpJointParams
 
     def ptpCoordinateParams(self):
         """
-        This command is to set the velocity and acceleration of the Cartesian coordinate axes in
+        This command is to get the velocity and acceleration of the Cartesian coordinate axes in
         PTP mode, the issued command packet is shown in Table 70, and the returned command
         packet is shown in Table 71.
         :return:
         """
-        return M1_msg.build_msg(81)
+        return M1_msg.build_msg(81,True),self.decode_ptpCoordinateParams
 
 
     def setPtpJointParams(self,velocity:Velocity,acceleration:Acceleration):
         payload =struct.pack("<ffffffff", velocity.x,velocity.y,velocity.z,velocity.r,acceleration.x,acceleration.y,acceleration.z,acceleration.r)
-        return M1_msg.build_msg(80,True,self.isQueued,*payload)
+        return M1_msg.build_msg(80,True,self.isQueued,payload)
 
     def decode_ptpJointParams(self,msg) -> (Velocity,Acceleration):
         id, write, isqueued, payload = M1_msg.decode_msg(msg)
@@ -61,7 +61,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
 
     def setPtpCoordinateParams(self,velocity_xyz:float,velocity_r:float,acc_xyz:float,acc_r:float):
         payload =struct.pack("<ffff", velocity_xyz,velocity_r,acc_xyz,acc_r)
-        return M1_msg.build_msg(81,True,self.isQueued,*payload)
+        return M1_msg.build_msg(81,True,self.isQueued,payload),self.decode_indexQueue
 
 
     def decode_ptpCoordinateParams(self,msg) -> (int,int,int,int):
@@ -82,15 +82,14 @@ class ProtocolFunctionPTPBase(M1_protocol):
         """
         payload =struct.pack("<ff", velocity,  acceleration )
         msg = M1_msg.build_msg(83,True,self.isQueued,payload)
-
-        return M1_msg.build_msg(83,True,self.isQueued,payload)
+        return msg,self.decode_indexQueue
 
     def ptpJumpParams(self) :
         """
         float jumpHeight; //Lifting height in Jump mode
         float zLimit; //Maximum lifting height in Jump mod
         """
-        return M1_msg.build_msg(82)
+        return M1_msg.build_msg(82),self.decode_ptpJumpParams
 
     def decode_ptpJumpParams(self,msg) ->(int,int):
         """
@@ -112,6 +111,6 @@ class ProtocolFunctionPTPBase(M1_protocol):
         """
         payload =struct.pack("<ff", jumpHeight,  zLimit )
         msg = M1_msg.build_msg(82,True,self.isQueued,payload)
-        return msg
+        return msg,self.decode_indexQueue
 
 

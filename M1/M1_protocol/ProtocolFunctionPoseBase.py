@@ -13,7 +13,7 @@ class ProtocolFunctionPoseBase(M1_protocol):
 
     def pose(self):
         msg = M1_msg.build_msg(10)
-        return msg
+        return msg,self.decode_pose
 
 
     def decode_pose(self,msg:bytearray):

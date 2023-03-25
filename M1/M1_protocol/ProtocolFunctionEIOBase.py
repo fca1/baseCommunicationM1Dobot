@@ -8,11 +8,11 @@ class ProtocolFunctionEIOBase(M1_protocol):
 
     def do(self):
         msg = M1_msg.build_msg(131,self.isQueued)
-        return msg
+        return msg,self.decode_do
 
     def setDo(self,index:bool,enable:bool):
         msg = M1_msg.build_msg(131, self.isQueued,bytes((int(index),int(enable))))
-        return msg
+        return msg,self.decode_indexQueue
 
     def decode_do(self,msg) -> bool:
         id,write,isqueued,payload =M1_msg.decode_msg(msg)

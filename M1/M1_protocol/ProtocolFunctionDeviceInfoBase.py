@@ -1,3 +1,5 @@
+from typing import Callable
+
 from M1.M1_protocol.M1_msg import M1_msg
 from M1.M1_protocol.M1_protocol import M1_protocol
 
@@ -13,9 +15,10 @@ class ProtocolFunctionDeviceInfoBase(M1_protocol):
             "deviceSn" : ( self.deviceSn,self.decode_deviceSN)
         }
 
-    def deviceSN(self):
+
+    def deviceSN(self) -> (bytes,Callable):
         msg = M1_msg.build_msg(0x00)
-        return msg
+        return msg,self.decode_deviceSN
 
 
     def decode_deviceSN(self,msg:bytearray):

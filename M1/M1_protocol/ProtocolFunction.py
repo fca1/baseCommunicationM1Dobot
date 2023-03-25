@@ -52,7 +52,7 @@ class ProtocolFunction:
 
     @property
     def pos(self) -> (PositionArm,AngleArm):
-        x,y,z,r,*angle =  self.comm.cmd(self.poseBase.pose, self.poseBase.decode_pose)
+        x,y,z,r,*angle =  self.comm.cmd(self.poseBase.pose)
         return PositionArm(x,y,z,r), AngleArm(*angle)
 
 
@@ -62,10 +62,10 @@ class ProtocolFunction:
 
     @property
     def status(self)->str:
-        return self.comm.cmd(self.alarmBase.status, self.alarmBase.decode_status)
+        return self.comm.cmd(self.alarmBase.status)
 
-    def setClearAllAlarmsState(self,alarmBase):
-        self.comm.cmd(self.alarmBase.clearAllAlarmsState, None)
+    def setClearAllAlarmsState(self):
+        self.comm.cmd(self.alarmBase.clearAllAlarmsState)
 
 
     def setPtpCoordinateParams(self,velocity:Velocity,acc:Acceleration):

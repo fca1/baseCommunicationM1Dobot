@@ -32,10 +32,10 @@ class ProtocolFunctionArmOrientationBase(M1_protocol):
         return msg
 
     def setArmOrientation(self,right:bool):
-        return M1_msg.build_msg(50, True, self.isQueued,bytearray((int(right),)) )
+        return M1_msg.build_msg(50, True, self.isQueued,bytearray((int(right),)) ),self.decode_indexQueue
 
     def orientation(self):
-        return M1_msg.build_msg(0x50)
+        return M1_msg.build_msg(0x50),self.decode_orientation
 
     def decode_orientation(self,msg):
         id, write, isqueued, payload = M1_msg.decode_msg(msg)

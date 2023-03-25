@@ -15,7 +15,7 @@ class ProtocolFunctionMiscBase(M1_protocol):
     def setToolFrame(self, length_arm,axe_arm,height):
         datas = struct.pack('<ffff', axe_arm, length_arm, height, 0)
         msg = M1_msg.build_msg(251, True,self.isQueued,datas)
-        return msg
+        return msg,self.decode_indexQueue
 
     def setUserFrame(self, pos0:PositionArm,pos1:PositionArm):
         # r est en fait l'angle forme entre X+ et le vecteur P0P1
@@ -24,7 +24,7 @@ class ProtocolFunctionMiscBase(M1_protocol):
         r += 180 if (pos1.x - pos0.x)<=0 else 0
         datas = struct.pack('<ffff', pos0.x, pos0.y, pos0.z, r)
         msg = M1_msg.build_msg(250, True,self.isQueued,datas)
-        return msg
+        return msg,self.decode_indexQueue
 
 
 

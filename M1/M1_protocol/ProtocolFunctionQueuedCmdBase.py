@@ -30,7 +30,7 @@ class ProtocolFunctionQueuedCmdBase(M1_protocol):
 
     def queuedCmdCurrentIndex(self):
         msg = M1_msg.build_msg(246,True)
-        return msg
+        return msg,self.decode_queuedCmdCurrentIndex
 
 
     def decode_queuedCmdCurrentIndex(self,msg:bytearray) ->int:

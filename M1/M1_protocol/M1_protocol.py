@@ -15,8 +15,10 @@ class M1_protocol:
 
     def decode_indexQueue(self,msg) ->int:
         id,write,isqueued,payload =M1_msg.decode_msg(msg)
-        count = struct.unpack("<Q",payload)
-        return count
+        if isqueued:
+            count = struct.unpack("<Q",payload)
+            return count
+        return None
 
 
 

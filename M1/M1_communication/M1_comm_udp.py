@@ -15,7 +15,7 @@ class M1_comm_udp:
         msgFromServer = self.client.recvfrom(self.bufferSize)
         return msgFromServer[0]
 
-    def cmd(self,fcnt:callable,decode:callable,*params) -> ...:
+    def cmd(self,fcnt:callable,*params) -> ...:
         """
         Le protocole travaille  selon le principe du ping pong
         :param fcnt: Fonction retournant un message bytes
@@ -23,8 +23,9 @@ class M1_comm_udp:
         :param params: parametres additionnels utilisés lors de l'appel de la méthode.
         :return: la donnée brute du robot si decode est None sinon variable selon decode.
         """
-        x = fcnt(*params)
+        msg_or_tuple = fcnt(*params)
+        x,decode_fcnt = msg_or_tuple,None if type(msg_or_tuple) is bytes else msg_or_tuple
         answer = self.send_msg(x)
-        if decode:
-            return decode(answer)
+        if decode_fcnt:
+            return decode_fcnt(answer)
         return answer

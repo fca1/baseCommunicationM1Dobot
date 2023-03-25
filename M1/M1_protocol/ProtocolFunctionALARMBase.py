@@ -17,7 +17,7 @@ class ProtocolFunctionALARMBase(M1_protocol):
         return msg
 
     def status(self):
-        return  M1_msg.build_msg(29)
+        return  M1_msg.build_msg(29),self.decode_status
 
 
     def decode_status(self, msg):
