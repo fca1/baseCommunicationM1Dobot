@@ -50,7 +50,7 @@ class ProtocolFunction:
     def serial(self) ->str:
         return self.comm.cmd(self.deviceInfoBase.deviceSN, self.deviceInfoBase.decode_deviceSN)
 
-
+    @property
     def pos(self) -> (PositionArm,AngleArm):
         x,y,z,r,*angle =  self.comm.cmd(self.poseBase.pose, self.poseBase.decode_pose)
         return PositionArm(x,y,z,r), AngleArm(*angle)
