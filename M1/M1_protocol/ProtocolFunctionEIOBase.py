@@ -12,7 +12,8 @@ class ProtocolFunctionEIOBase(M1_protocol):
         return msg, self._decode_do
 
     @M1_protocol.cmd
-    def setDo(self, index: bool, enable: bool):
+    def setDo(self, index: int, enable: bool):
+        assert 1 <= index <=22
         msg = M1_msg.build_msg(131,True, self.isQueued, bytes((int(index), int(enable))))
         return msg, self.decode_indexQueue
 

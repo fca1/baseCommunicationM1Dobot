@@ -11,6 +11,12 @@ protocol = CommProtocolM1("192.168.0.55")
 protocol.setTimeout(5)
 
 assert protocol.serial()
+
+xx = protocol.alarm
+
+protocol.eioBase.setDo(1,False)
+
+
 # Faire un homing
 protocol.hhtBase.setHttTrigOutputEnabled(False)
 

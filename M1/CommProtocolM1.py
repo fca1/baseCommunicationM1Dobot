@@ -10,6 +10,7 @@ class CommProtocolM1(M1_comm_udp, ProtocolFunction):
         M1_comm_udp.__init__(self, addr, port)
         ProtocolFunction.__init__(self)
         # utilise par le decorateur pour pouvoir envoyer et recevoir des messages.
+
         M1_protocol._fcnt_send_rcve = self.cmd
 
     def cmd(self, fcnt: callable, *params) -> ...:
@@ -25,6 +26,10 @@ class CommProtocolM1(M1_comm_udp, ProtocolFunction):
         if decode_fcnt:
             return decode_fcnt(answer)
         return answer
+
+    @property
+    def alarm(self):
+        return self.alarmBase.alarm()
 
     def serial(self) -> str:
         return self.deviceInfoBase.deviceSN()
@@ -45,8 +50,6 @@ class CommProtocolM1(M1_comm_udp, ProtocolFunction):
     def setClearAllAlarmsState(self):
         self.alarmBase.clearAllAlarmsState()
 
-    def setPtpCoordinateParams(self, velocity: Velocity, acc: Acceleration):
-        self.ptpBase.setPtpJointParams(velocity,acc)
 
     def setTimeout(self, timeout):
         self.client.settimeout(timeout)

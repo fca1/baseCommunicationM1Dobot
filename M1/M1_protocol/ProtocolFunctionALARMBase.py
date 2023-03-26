@@ -31,3 +31,20 @@ class ProtocolFunctionALARMBase(M1_protocol):
             return "ran"
 
         return ""
+
+    @M1_protocol.cmd
+    def alarm(self) :
+        return M1_msg.build_msg(20), self._decode_alarm
+
+    def _decode_alarm(self, msg):
+        _id, write, isqueued, payload = M1_msg.decode_msg(msg)
+        index=0
+        for s in payload:
+            if s==0:
+                index+=8
+            else:
+                for j in range(8):
+                    if   s & (1<<j):
+                        return index
+                    index+=1
+        return 0
