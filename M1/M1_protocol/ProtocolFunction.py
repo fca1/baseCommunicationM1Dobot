@@ -1,4 +1,3 @@
-from M1.M1_communication.M1_comm_udp import M1_comm_udp
 from M1.M1_protocol.ProtocolFunctionALARMBase import ProtocolFunctionALARMBase
 from M1.M1_protocol.ProtocolFunctionARCBase import ProtocolFunctionARCBase
 from M1.M1_protocol.ProtocolFunctionArmOrientationBase import ProtocolFunctionArmOrientationBase
@@ -15,8 +14,6 @@ from M1.M1_protocol.ProtocolFunctionPoseBase import ProtocolFunctionPoseBase
 from M1.M1_protocol.ProtocolFunctionQueuedCmdBase import ProtocolFunctionQueuedCmdBase
 from M1.M1_protocol.ProtocolFunctionTRIGBase import ProtocolFunctionTRIGBase
 from M1.M1_protocol.ProtocolFunctionWAITBase import ProtocolFunctionWAITBase
-from M1.misc.AngleArm import  AngleArm
-from M1.misc.PositionArm import PositionArm
 
 
 
@@ -25,8 +22,7 @@ class ProtocolFunction:
     """
     La documentation Dobot explique avoir categrisé les fonctions.
     """
-    def __init__(self,comm:M1_comm_udp):
-        self.comm = comm
+    def __init__(self):
         self.armOrientationBase = ProtocolFunctionArmOrientationBase()
         self.deviceInfoBase = ProtocolFunctionDeviceInfoBase()
         self.poseBase = ProtocolFunctionPoseBase()
@@ -47,26 +43,3 @@ class ProtocolFunction:
         pass
 
 
-    def serial(self) ->str:
-        return self.comm.cmd(self.deviceInfoBase.deviceSN)
-
-    @property
-    def pos(self) -> (PositionArm,AngleArm):
-        x,y,z,r,*angle =  self.comm.cmd(self.poseBase.pose)
-        return PositionArm(x,y,z,r), AngleArm(*angle)
-
-
-    @property
-    def status_ok(self) ->bool:
-        return not "error" in self.status
-
-    @property
-    def status(self)->str:
-        return self.comm.cmd(self.alarmBase.status)
-
-    def setClearAllAlarmsState(self):
-        self.comm.cmd(self.alarmBase.clearAllAlarmsState)
-
-
-    def setPtpCoordinateParams(self,velocity:Velocity,acc:Acceleration):
-        self.comm.cmd(self.ptpBase.setPtpJointParams())
