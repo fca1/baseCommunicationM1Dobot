@@ -10,10 +10,6 @@ class ProtocolFunctionDeviceInfoBase(M1_protocol):
     def __init__(self):
         super().__init__()
 
-    def build_commands(self):
-        return {
-            "deviceSn" : ( self.deviceSn,self.decode_deviceSN)
-        }
 
 
     def deviceSN(self) -> (bytes,Callable):

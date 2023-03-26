@@ -1,15 +1,20 @@
 import struct
+from functools import wraps
 
 from M1.M1_protocol.M1_msg import M1_msg
 
 
 class M1_protocol:
+    fcnt_send_rcve=lambda x: None
+
 
     def __init__(self):
         self._isQueued=False
 
-    def build_commands(self):
-        return {}
+
+    @staticmethod
+    def _communicate(*kargs,**kwargs):
+        return M1_protocol.fcnt_send_rcve(*kargs,**kwargs)
 
 
 
@@ -34,5 +39,13 @@ class M1_protocol:
         finally:
             self._isQueued=False
 
+    @staticmethod
+    def m1_protocol(func):
+        @wraps(func)
+        def send_rcve(*kargs,**kwargs):
+            return M1_protocol._communicate(func(*kargs,**kwargs))
+        return send_rcve
+        pass
 
-    pass
+
+
