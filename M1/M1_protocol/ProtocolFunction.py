@@ -9,19 +9,18 @@ from M1.M1_protocol.ProtocolFunctionHHTBase import ProtocolFunctionHHTBase
 from M1.M1_protocol.ProtocolFunctionHOMEBase import ProtocolFunctionHOMEBase
 from M1.M1_protocol.ProtocolFunctionJOGBase import ProtocolFunctionJOGBase
 from M1.M1_protocol.ProtocolFunctionMiscBase import ProtocolFunctionMiscBase
-from M1.M1_protocol.ProtocolFunctionPTPBase import ProtocolFunctionPTPBase, Acceleration, Velocity
+from M1.M1_protocol.ProtocolFunctionPTPBase import ProtocolFunctionPTPBase
 from M1.M1_protocol.ProtocolFunctionPoseBase import ProtocolFunctionPoseBase
 from M1.M1_protocol.ProtocolFunctionQueuedCmdBase import ProtocolFunctionQueuedCmdBase
 from M1.M1_protocol.ProtocolFunctionTRIGBase import ProtocolFunctionTRIGBase
 from M1.M1_protocol.ProtocolFunctionWAITBase import ProtocolFunctionWAITBase
 
 
-
-
 class ProtocolFunction:
     """
     La documentation Dobot explique avoir categrisé les fonctions.
     """
+
     def __init__(self):
         self.armOrientationBase = ProtocolFunctionArmOrientationBase()
         self.deviceInfoBase = ProtocolFunctionDeviceInfoBase()
@@ -31,7 +30,7 @@ class ProtocolFunction:
         self.hhtBase = ProtocolFunctionHHTBase()
         self.cpBase = ProtocolFunctionCPBase()
         self.endEffectorBase = ProtocolFunctionEndEffectorBase()
-        self.jogBase  =ProtocolFunctionJOGBase()
+        self.jogBase = ProtocolFunctionJOGBase()
         self.ptpBase = ProtocolFunctionPTPBase()
         self.queueCmdBase = ProtocolFunctionQueuedCmdBase()
         self.arcBase = ProtocolFunctionARCBase()
@@ -41,5 +40,3 @@ class ProtocolFunction:
         self.miscBase = ProtocolFunctionMiscBase()
 
         pass
-
-

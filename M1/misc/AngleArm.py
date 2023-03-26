@@ -7,4 +7,3 @@ class AngleArm:
     rear: float
     front: float
     defector: float
-

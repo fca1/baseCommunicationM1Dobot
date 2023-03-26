@@ -6,15 +6,16 @@ class ProtocolFunctionEIOBase(M1_protocol):
     def __init__(self):
         super().__init__()
 
+    @M1_protocol.cmd
     def do(self):
-        msg = M1_msg.build_msg(131,self.isQueued)
-        return msg,self.decode_do
+        msg = M1_msg.build_msg(131, self.isQueued)
+        return msg, self.decode_do
 
-    def setDo(self,index:bool,enable:bool):
-        msg = M1_msg.build_msg(131, self.isQueued,bytes((int(index),int(enable))))
-        return msg,self.decode_indexQueue
+    @M1_protocol.cmd
+    def setDo(self, index: bool, enable: bool):
+        msg = M1_msg.build_msg(131,True, self.isQueued, bytes((int(index), int(enable))))
+        return msg, self.decode_indexQueue
 
-    def decode_do(self,msg) -> bool:
-        id,write,isqueued,payload =M1_msg.decode_msg(msg)
+    def decode_do(self, msg) -> bool:
+        _id, write, isqueued, payload = M1_msg.decode_msg(msg)
         return bool(payload[1])
-
