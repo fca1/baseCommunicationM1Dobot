@@ -1,7 +1,6 @@
 from M1.M1_communication.M1_comm_udp import M1_comm_udp
-from M1.M1_protocol.M1_protocol import M1_protocol
+from M1.M1_protocol.M1_protocol import M1_protocol, Acceleration, Velocity
 from M1.M1_protocol.ProtocolFunction import ProtocolFunction
-from M1.M1_protocol.ProtocolFunctionPTPBase import Acceleration, Velocity
 from M1.misc.AngleArm import AngleArm
 from M1.misc.PositionArm import PositionArm
 

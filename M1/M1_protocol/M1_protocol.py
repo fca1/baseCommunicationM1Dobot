@@ -1,4 +1,5 @@
 import struct
+from dataclasses import dataclass
 from functools import wraps
 from typing import Tuple, Any
 
@@ -41,3 +42,24 @@ class M1_protocol:
 
         return send_rcve
         pass
+
+
+class Acceleration:
+    x: float
+    y: float
+    z: float
+    r: float
+
+    def __repr__(self):
+        return f"ACC x={round(self.x)}%,y={round(self.y)}%,z={round(self.z)}%,r={round(self.r)}%"
+
+
+@dataclass
+class Velocity:
+    x: float
+    y: float
+    z: float
+    r: float
+
+    def __repr__(self):
+        return f"Velocity x={round(self.x)}%,y={round(self.y)}%,z={round(self.z)}%,r={round(self.r)}%"

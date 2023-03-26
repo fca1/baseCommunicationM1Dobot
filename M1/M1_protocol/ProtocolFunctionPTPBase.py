@@ -1,29 +1,7 @@
 import struct
-from dataclasses import dataclass
 
 from M1.M1_protocol.M1_msg import M1_msg
-from M1.M1_protocol.M1_protocol import M1_protocol
-
-
-@dataclass
-class Velocity:
-    x: float
-    y: float
-    z: float
-    r: float
-
-    def __repr__(self):
-        return f"Velocity x={round(self.x)}%,y={round(self.y)}%,z={round(self.z)}%,r={round(self.r)}%"
-
-
-class Acceleration:
-    x: float
-    y: float
-    z: float
-    r: float
-
-    def __repr__(self):
-        return f"ACC x={round(self.x)}%,y={round(self.y)}%,z={round(self.z)}%,r={round(self.r)}%"
+from M1.M1_protocol.M1_protocol import M1_protocol, Acceleration, Velocity
 
 
 class ProtocolFunctionPTPBase(M1_protocol):
