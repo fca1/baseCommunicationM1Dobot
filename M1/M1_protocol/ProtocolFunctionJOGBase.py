@@ -32,14 +32,14 @@ class ProtocolFunctionJOGBase(M1_protocol):
                               acceleration.y, acceleration.z, acceleration.r)
         return M1_msg.build_msg(70, True, self.isQueued, payload), self.decode_indexQueue
 
-    def decode_jogJointParams(self, msg) -> (Velocity, Acceleration):
+    def _decode_jogJointParams(self, msg) -> (Velocity, Acceleration):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
         x, y, z, r, *acc = struct.unpack("<ffffffff", payload)
         return Velocity(x, y, z, r), Acceleration(*acc)
 
     @M1_protocol.cmd
     def jogJointParams(self):
-        return M1_msg.build_msg(70, True),self.decode_jogJointParams
+        return M1_msg.build_msg(70, True),self._decode_jogJointParams
 
 
     @M1_protocol.cmd
@@ -48,14 +48,14 @@ class ProtocolFunctionJOGBase(M1_protocol):
                               acceleration.y, acceleration.z, acceleration.r)
         return M1_msg.build_msg(71, True, self.isQueued, payload), self.decode_indexQueue
 
-    def decode_jogCoordinateParams(self, msg) -> (Velocity, Acceleration):
+    def _decode_jogCoordinateParams(self, msg) -> (Velocity, Acceleration):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
         x, y, z, r, *acc = struct.unpack("<ffffffff", payload)
         return Velocity(x, y, z, r), Acceleration(*acc)
 
     @M1_protocol.cmd
     def jogCoordinateParams(self):
-        return M1_msg.build_msg(71, True),self.decode_jogCoordinateParams
+        return M1_msg.build_msg(71, True),self._decode_jogCoordinateParams
 
 
 

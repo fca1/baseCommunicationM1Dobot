@@ -16,9 +16,9 @@ class ProtocolFunctionALARMBase(M1_protocol):
 
     @M1_protocol.cmd
     def status(self):
-        return M1_msg.build_msg(29), self.decode_status
+        return M1_msg.build_msg(29), self._decode_status
 
-    def decode_status(self, msg):
+    def _decode_status(self, msg):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
         st0, st1, _, _ = struct.unpack("BBBB", payload)
         if st0 & 1:

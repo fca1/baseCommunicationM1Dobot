@@ -12,9 +12,9 @@ class ProtocolFunctionPoseBase(M1_protocol):
     @M1_protocol.cmd
     def pose(self):
         msg = M1_msg.build_msg(10)
-        return msg, self.decode_pose
+        return msg, self._decode_pose
 
-    def decode_pose(self, msg: bytearray):
+    def _decode_pose(self, msg: bytearray):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
         x, y, z, r, angle_base, angle_rear, angle_form, angle_deflector = struct.unpack("<ffffffff", payload)
         return x, y, z, r, angle_base, angle_rear, angle_form, angle_deflector

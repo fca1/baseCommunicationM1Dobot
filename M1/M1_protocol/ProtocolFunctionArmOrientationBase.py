@@ -38,8 +38,8 @@ class ProtocolFunctionArmOrientationBase(M1_protocol):
 
     @M1_protocol.cmd
     def orientation(self):
-        return M1_msg.build_msg(0x50), self.decode_orientation
+        return M1_msg.build_msg(0x50), self._decode_orientation
 
-    def decode_orientation(self, msg):
+    def _decode_orientation(self, msg):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
         return "right" if payload[0] else "left"

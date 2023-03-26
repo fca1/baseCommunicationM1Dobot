@@ -21,6 +21,20 @@ if 0:
     pinitial = p1 - p0
     pass
 
+# Test queue
+protocol.queueCmdBase.setQueuedCmdStopExec()
+protocol.queueCmdBase.setQueuedCmdClear()
+step0 = protocol.jogBase.queued.setJOGCmd(E_key.XN_DOWN)
+protocol.waitBase.queued.setWaitms(1000)
+step1 = protocol.jogBase.queued.setJOGCmd(E_key.IDLE)
+protocol.queueCmdBase.setQueuedCmdStartExec()
+time.sleep(1)
+step2  = protocol.queueCmdBase.queuedCmdCurrentIndex()
+
+
+
+
+
 # Test sur user position
 p0 = PositionArm(400, 0, 230)
 p1 = PositionArm(200, 0, 230)
