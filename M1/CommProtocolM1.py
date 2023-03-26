@@ -47,3 +47,6 @@ class CommProtocolM1(M1_comm_udp, ProtocolFunction):
 
     def setPtpCoordinateParams(self, velocity: Velocity, acc: Acceleration):
         self.ptpBase.setPtpJointParams(velocity,acc)
+
+    def setTimeout(self, timeout):
+        self.client.settimeout(timeout)

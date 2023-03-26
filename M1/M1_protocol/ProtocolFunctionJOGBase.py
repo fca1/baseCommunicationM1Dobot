@@ -76,5 +76,5 @@ class ProtocolFunctionJOGBase(M1_protocol):
 
     @M1_protocol.cmd
     def setJOGCmd(self,cmd:E_KEY,isJoint:bool):
-        payload = struct.pack("<BB",int(isJoint) ,cmd)
-        return  M1_msg.build_msg(72, True, self.isQueued, payload), self.decode_indexQueue
+        payload = struct.pack("<BB",int(isJoint) ,cmd.value)
+        return  M1_msg.build_msg(73, True, self.isQueued, payload), self.decode_indexQueue
