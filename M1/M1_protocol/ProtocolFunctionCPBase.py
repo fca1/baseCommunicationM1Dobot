@@ -1,7 +1,8 @@
 import struct
 
 from M1.M1_protocol.M1_msg import M1_msg
-from M1.M1_protocol.M1_protocol import M1_protocol, Point
+from M1.M1_protocol.M1_protocol import M1_protocol
+from M1.misc.PositionArm import PositionArm
 
 
 class ProtocolFunctionCPBase(M1_protocol):
@@ -27,7 +28,7 @@ def _decode_cpParams(self,msg):
     return planAcc, junctionVel, acc_period, is_realtime
 
 @M1_protocol.cmd
-def setCpCmd(self,point:Point,velocity:float):
+def setCpCmd(self,point:PositionArm,velocity:float):
     payload = struct.pack("<ffff", point.x,point.y,point.z,velocity)
     return M1_msg.build_msg(91, True, self.isQueued, payload), self._decode_indexQueue
 

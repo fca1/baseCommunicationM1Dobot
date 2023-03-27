@@ -29,7 +29,7 @@ class ProtocolFunctionArmOrientationBase(M1_protocol):
         # "aa aa 13 54 03 01 (00 00 2c c3) (00 00 48 42) (00 00 00 10)   25 c3 00 00 c8 42 3d"
 
         datas = struct.pack('<Bffff', mode.value, pos.x, pos.y, pos.z, pos.r)
-        msg = M1_msg.build_msg(0x54, True, self.isQueued, datas)
+        msg = M1_msg.build_msg(84, True, self.isQueued, datas)
         return msg
 
     @M1_protocol.cmd

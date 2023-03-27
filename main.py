@@ -10,74 +10,49 @@ from M1.misc.PositionArm import PositionArm
 protocol = CommProtocolM1("192.168.0.55")
 protocol.setTimeout(5)
 
+# Detection presence du M1
 assert protocol.serial()
 
-xx = protocol.alarm
-
+# Mettre alimentation sur le robot
+protocol.hhtBase.setHttTrigOutputEnabled(False)
+# Pas d'impulsion sur la sortie
 protocol.eioBase.setDo(1,False)
 
 
-# Faire un homing
-protocol.hhtBase.setHttTrigOutputEnabled(False)
 
+reason = protocol.alarm
+if reason:
+    print(f"Erreur sur le M1: error ={reason}")
+    protocol.alarmBase.clearAllAlarmsState()
 
-# Test queue
+# Nettoyer la queue de messages
 protocol.queueCmdBase.setQueuedCmdForceStopExec()
 protocol.queueCmdBase.setQueuedCmdClear()
-for i in range(30):
-    print(protocol.armOrientationBase.queued.setArmOrientation(False))
-step0 = protocol.jogBase.queued.setJOGCmd(E_KEY.XN_DOWN,isJoint=False)
-protocol.waitBase.queued.setWaitms(1000)
-step1 = protocol.jogBase.queued.setJOGCmd(E_KEY.IDLE,isJoint=False)
-protocol.queueCmdBase.setQueuedCmdStartExec()
-time.sleep(1)
-step2  = protocol.queueCmdBase.queuedCmdCurrentIndex()
 
+# Faire un homing (Attention R ? )
+protocol.homeBase.setHome()
+while protocol.status == "ran":
+    time.sleep(2)
 
-
-if 0:
-    protocol.homeBase.setHome()
-    while protocol.status == "ran":
-        time.sleep(2)
-    p0 = PositionArm(0, 0, 230)
-    p1 = PositionArm(400, 0, 230)
-    protocol.miscBase.setUserFrame(p0, p1)  # user tool
-    pinitial = p1 - p0
-    pass
-
-
-
-
-
-# Test sur user position
-p0 = PositionArm(400, 0, 230)
-p1 = PositionArm(200, 0, 230)
+# Mettre par defaut une zone de travail  ( le tout en bout = 0)
+p0 = PositionArm(0, 0, 230)
+p1 = PositionArm(400, 0, 230)
 protocol.miscBase.setUserFrame(p0, p1)  # user tool
 
+# Choisir une orientation et passer sur un point intermediaire apres avoir géré acceleration
 protocol.armOrientationBase.queued.setArmOrientation(False)
-p0, _ = protocol.pos
-pr = PositionArm(100, 0, -30, 0)
-protocol.armOrientationBase.setPTPCmd(pr, E_ptpMode.MOVL_XYZ)
+protocol.ptpBase.setPtpCoordinateParams(50,50,50,50)
 
-protocol.alarmBase.clearAllAlarmsState()
-# Le systeme est communiquant.
-# Couper les moteurs pour faire du teaching
-protocol.hhtBase.setHttTrigOutputEnabled(True)
-# Attendre le retour de P0,P1
-# input("Se positionner en P0")
-p0, _ = protocol.pos
-# input("Se positionner en P1")
-p1, _ = protocol.pos
-protocol.miscBase.setUserFrame(p0, p1)  # user tool
-protocol.miscBase.setToolFrame(0, 0, 0)  # user tool
-# Demander une orientation de l'arm
-protocol.armOrientationBase.setArmOrientation(right=False)
-# Se remettre en mode normal
-protocol.hhtBase.setHttTrigOutputEnabled(False)
-# Acceleration a 100%
-protocol.ptpBase.setPtpCommonParams(velocity=10, acceleration=100)
-# Revenir en p0
-protocol.armOrientationBase.setPTPCmd(p0)
-time.sleep(6)
-protocol.armOrientationBase.setPTPCmd(p1)
-time.sleep(6)
+p1 = PositionArm(200,100,200)
+p2 = PositionArm(150,150,150)
+
+while True:
+    protocol.armOrientationBase.setPTPCmd(p1,E_ptpMode.MOVL_XYZ)
+    protocol.armOrientationBase.setPTPCmd(p2,E_ptpMode.MOVL_XYZ)
+
+
+
+
+
+
+

@@ -3,9 +3,9 @@ from dataclasses import dataclass
 
 @dataclass
 class PositionArm:
-    x: float = 400
+    x: float = 0
     y: float = 0
-    z: float = 230
+    z: float = 0
     r: float = 0
 
     def __add__(self, other):
