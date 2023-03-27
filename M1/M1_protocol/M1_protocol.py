@@ -13,7 +13,7 @@ class M1_protocol:
     def __init__(self):
         self._isQueued = False
 
-    def decode_indexQueue(self, msg) -> tuple[Any, ...]:
+    def _decode_indexQueue(self, msg) -> tuple[Any, ...]:
         id, write, isqueued, payload = M1_msg.decode_msg(msg)
         if isqueued:
             count = struct.unpack("<Q", payload)
@@ -63,3 +63,12 @@ class Velocity:
 
     def __repr__(self):
         return f"Velocity x={round(self.x)}%,y={round(self.y)}%,z={round(self.z)}%,r={round(self.r)}%"
+
+@dataclass
+class Point:
+    x: float
+    y: float
+    z: float
+    r:float
+    def __repr__(self):
+        return f"P({round(self.x)},{round(self.y)},{round(self.z)},r={round(self.r)})"

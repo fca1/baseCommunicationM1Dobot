@@ -30,7 +30,7 @@ class ProtocolFunctionJOGBase(M1_protocol):
     def setJOGJointParams(self, velocity: Velocity, acceleration: Acceleration):
         payload = struct.pack("<ffffffff", velocity.x, velocity.y, velocity.z, velocity.r, acceleration.x,
                               acceleration.y, acceleration.z, acceleration.r)
-        return M1_msg.build_msg(70, True, self.isQueued, payload), self.decode_indexQueue
+        return M1_msg.build_msg(70, True, self.isQueued, payload), self._decode_indexQueue
 
     def _decode_jogJointParams(self, msg) -> (Velocity, Acceleration):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
@@ -46,7 +46,7 @@ class ProtocolFunctionJOGBase(M1_protocol):
     def setCoordinateJointParams(self, velocity: Velocity, acceleration: Acceleration):
         payload = struct.pack("<ffffffff", velocity.x, velocity.y, velocity.z, velocity.r, acceleration.x,
                               acceleration.y, acceleration.z, acceleration.r)
-        return M1_msg.build_msg(71, True, self.isQueued, payload), self.decode_indexQueue
+        return M1_msg.build_msg(71, True, self.isQueued, payload), self._decode_indexQueue
 
     def _decode_jogCoordinateParams(self, msg) -> (Velocity, Acceleration):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
@@ -64,11 +64,11 @@ class ProtocolFunctionJOGBase(M1_protocol):
     def setJOGCommonParams(self, velocity: float, acceleration: float):
         payload = struct.pack("<ff", velocity, acceleration)
         msg = M1_msg.build_msg(72, True, self.isQueued, payload)
-        return msg, self.decode_indexQueue
+        return msg, self._decode_indexQueue
 
     @M1_protocol.cmd
     def jogCommonParams(self):
-        return  M1_msg.build_msg(72, True,self.isQueued), self.decode_indexQueue
+        return  M1_msg.build_msg(72, True,self.isQueued), self._decode_indexQueue
 
 
 
@@ -77,4 +77,4 @@ class ProtocolFunctionJOGBase(M1_protocol):
     @M1_protocol.cmd
     def setJOGCmd(self,cmd:E_KEY,isJoint:bool):
         payload = struct.pack("<BB",int(isJoint) ,cmd.value)
-        return  M1_msg.build_msg(73, True, self.isQueued, payload), self.decode_indexQueue
+        return  M1_msg.build_msg(73, True, self.isQueued, payload), self._decode_indexQueue

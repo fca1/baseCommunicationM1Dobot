@@ -42,7 +42,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
     @M1_protocol.cmd
     def setPtpCoordinateParams(self, velocity_xyz: float, velocity_r: float, acc_xyz: float, acc_r: float):
         payload = struct.pack("<ffff", velocity_xyz, velocity_r, acc_xyz, acc_r)
-        return M1_msg.build_msg(81, True, self.isQueued, payload), self.decode_indexQueue
+        return M1_msg.build_msg(81, True, self.isQueued, payload), self._decode_indexQueue
 
     def _decode_ptpCoordinateParams(self, msg) -> (int, int, int, int):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
@@ -62,7 +62,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
         """
         payload = struct.pack("<ff", velocity, acceleration)
         msg = M1_msg.build_msg(83, True, self.isQueued, payload)
-        return msg, self.decode_indexQueue
+        return msg, self._decode_indexQueue
 
     def ptpJumpParams(self):
         """
@@ -92,4 +92,4 @@ class ProtocolFunctionPTPBase(M1_protocol):
         """
         payload = struct.pack("<ff", jumpHeight, zLimit)
         msg = M1_msg.build_msg(82, True, self.isQueued, payload)
-        return msg, self.decode_indexQueue
+        return msg, self._decode_indexQueue

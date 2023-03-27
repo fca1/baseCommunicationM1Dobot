@@ -34,7 +34,7 @@ class ProtocolFunctionArmOrientationBase(M1_protocol):
 
     @M1_protocol.cmd
     def setArmOrientation(self, right: bool):
-        return M1_msg.build_msg(50, True, self.isQueued, bytearray((int(right),))), self.decode_indexQueue
+        return M1_msg.build_msg(50, True, self.isQueued, bytearray((int(right),))), self._decode_indexQueue
 
     @M1_protocol.cmd
     def orientation(self):
