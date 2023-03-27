@@ -2,15 +2,39 @@ import time
 
 from M1.CommProtocolM1 import CommProtocolM1
 from M1.M1_protocol.ProtocolFunctionArmOrientationBase import E_ptpMode
+from M1.M1_protocol.ProtocolFunctionJOGBase import E_KEY
 from M1.misc.PositionArm import PositionArm
 
 # Initialiser le systeme de communication udp
 
 protocol = CommProtocolM1("192.168.0.55")
+protocol.setTimeout(5)
 
 assert protocol.serial()
+
+xx = protocol.alarm
+
+protocol.eioBase.setDo(1,False)
+
+
 # Faire un homing
 protocol.hhtBase.setHttTrigOutputEnabled(False)
+
+
+# Test queue
+protocol.queueCmdBase.setQueuedCmdForceStopExec()
+protocol.queueCmdBase.setQueuedCmdClear()
+for i in range(30):
+    print(protocol.armOrientationBase.queued.setArmOrientation(False))
+step0 = protocol.jogBase.queued.setJOGCmd(E_KEY.XN_DOWN,isJoint=False)
+protocol.waitBase.queued.setWaitms(1000)
+step1 = protocol.jogBase.queued.setJOGCmd(E_KEY.IDLE,isJoint=False)
+protocol.queueCmdBase.setQueuedCmdStartExec()
+time.sleep(1)
+step2  = protocol.queueCmdBase.queuedCmdCurrentIndex()
+
+
+
 if 0:
     protocol.homeBase.setHome()
     while protocol.status == "ran":
@@ -20,6 +44,10 @@ if 0:
     protocol.miscBase.setUserFrame(p0, p1)  # user tool
     pinitial = p1 - p0
     pass
+
+
+
+
 
 # Test sur user position
 p0 = PositionArm(400, 0, 230)

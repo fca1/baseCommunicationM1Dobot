@@ -33,9 +33,9 @@ class ProtocolFunctionQueuedCmdBase(M1_protocol):
     @M1_protocol.cmd
     def queuedCmdCurrentIndex(self):
         msg = M1_msg.build_msg(246, True)
-        return msg, self.decode_queuedCmdCurrentIndex
+        return msg, self._decode_queuedCmdCurrentIndex
 
-    def decode_queuedCmdCurrentIndex(self, msg: bytearray) -> tuple[Any, ...]:
+    def _decode_queuedCmdCurrentIndex(self, msg: bytearray) -> tuple[Any, ...]:
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
         count = struct.unpack("<Q", payload)
         return count

@@ -13,7 +13,11 @@ class M1_comm_udp:
 
     def send_msg(self, bytesToSend: bytearray) -> bytes:
         self.client.sendto(bytesToSend, self.m1AddressPort)
-        msgFromServer = self.client.recvfrom(self.bufferSize)
+        try:
+            msgFromServer = self.client.recvfrom(self.bufferSize)
+        except socket.timeout as e:
+            raise Exception(f"Timeout msg: {bytesToSend.hex()}")
+
         return msgFromServer[0]
 
     def cmd(self, msg_or_tuple: bytes) -> ...:

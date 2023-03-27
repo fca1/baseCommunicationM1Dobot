@@ -16,7 +16,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
         mode, the issued command packet is shown in Table 68, and the returned command packet
         is shown in Table 69.
         """
-        return M1_msg.build_msg(80, True), self.decode_ptpJointParams
+        return M1_msg.build_msg(80, True), self._decode_ptpJointParams
 
     @M1_protocol.cmd
     def ptpCoordinateParams(self):
@@ -26,7 +26,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
         packet is shown in Table 71.
         :return:
         """
-        return M1_msg.build_msg(81, True), self.decode_ptpCoordinateParams
+        return M1_msg.build_msg(81, True), self._decode_ptpCoordinateParams
 
     @M1_protocol.cmd
     def setPtpJointParams(self, velocity: Velocity, acceleration: Acceleration):
@@ -34,7 +34,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
                               acceleration.y, acceleration.z, acceleration.r)
         return M1_msg.build_msg(80, True, self.isQueued, payload)
 
-    def decode_ptpJointParams(self, msg) -> (Velocity, Acceleration):
+    def _decode_ptpJointParams(self, msg) -> (Velocity, Acceleration):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
         x, y, z, r, *acc = struct.unpack("<ffffffff", payload)
         return Velocity(x, y, z, r), Acceleration(*acc)
@@ -44,7 +44,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
         payload = struct.pack("<ffff", velocity_xyz, velocity_r, acc_xyz, acc_r)
         return M1_msg.build_msg(81, True, self.isQueued, payload), self.decode_indexQueue
 
-    def decode_ptpCoordinateParams(self, msg) -> (int, int, int, int):
+    def _decode_ptpCoordinateParams(self, msg) -> (int, int, int, int):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
         xyz, r, acc_xyz, acc_r = struct.unpack("<ffff", payload)
         return xyz, r, acc_xyz, acc_r
@@ -69,9 +69,9 @@ class ProtocolFunctionPTPBase(M1_protocol):
         float jumpHeight; //Lifting height in Jump mode
         float zLimit; //Maximum lifting height in Jump mod
         """
-        return M1_msg.build_msg(82), self.decode_ptpJumpParams
+        return M1_msg.build_msg(82), self._decode_ptpJumpParams
 
-    def decode_ptpJumpParams(self, msg) -> (int, int):
+    def _decode_ptpJumpParams(self, msg) -> (int, int):
         """
         float jumpHeight; //Lifting height in Jump mode
         float zLimit; //Maximum lifting height in Jump mod
