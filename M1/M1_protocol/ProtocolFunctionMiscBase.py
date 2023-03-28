@@ -9,6 +9,8 @@ from M1.misc.PositionArm import PositionArm
 
 @dataclass
 class Param_dynamic:
+    # LEs parametres par defaut, sont issus du test fait avec DOBOT M1
+    # ce n'est pas publie pour trouver les valeurs.
     zz1:float=0.2617
     fs1:float=0.0565
     fv1:float=0.0459
@@ -58,3 +60,23 @@ class ProtocolFunctionMiscBase(M1_protocol):
         pd.zz1,pd.fs1,pd.fv1,pd.zz2,pd.mx2,pd.my2,pd.ia2,pd.fs2,pd.fv2 = struct.unpack("<fffffffff", payload)
         return pd
 
+
+    @M1_protocol.cmd
+    def setDynamicPayload(self,charge_kg:float ):
+        payload = struct.pack("<f", charge_kg )
+        return M1_msg.build_msg(203, True, False, payload)
+
+
+    @M1_protocol.cmd
+    def setSecurityLevelConfiguration(self,tolerateJ1:float,tolerateJ2:float,tolerateJ3:float,tolerateJ4:float):
+        # Attention, la velocity se fait avec (80 @ptpJointParams )
+        payload = struct.pack("<ffff",tolerateJ1,tolerateJ2,tolerateJ3,tolerateJ4)
+        return M1_msg.build_msg(201, True, False, payload)
+
+    @M1_protocol.cmd
+    def securityLevelConfiguration(self):
+        return M1_msg.build_msg(201, True, False),self._decode_securityLevelConfiguration
+
+    def _decode_securityLevelConfiguration(self,msg):
+        tolerateJ1, tolerateJ2, tolerateJ3, tolerateJ4 = struct.unpack("<ffff",msg)
+        return tolerateJ1, tolerateJ2, tolerateJ3, tolerateJ4
