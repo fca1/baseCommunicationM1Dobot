@@ -1,9 +1,23 @@
 import math
 import struct
+from dataclasses import dataclass
 
 from M1.M1_protocol.M1_msg import M1_msg
 from M1.M1_protocol.M1_protocol import M1_protocol
 from M1.misc.PositionArm import PositionArm
+
+
+@dataclass
+class Param_dynamic:
+    zz1:float=0.2617
+    fs1:float=0.0565
+    fv1:float=0.0459
+    zz2:float=7.4010
+    mx2:float=0.2404
+    my2:float=3.0811
+    ia2:float=1.6345
+    fs2:float=-0.0198
+    fv2:float=1.9735
 
 
 class ProtocolFunctionMiscBase(M1_protocol):
@@ -25,3 +39,22 @@ class ProtocolFunctionMiscBase(M1_protocol):
         datas = struct.pack('<ffff', pos0.x, pos0.y, pos0.z, r)
         msg = M1_msg.build_msg(250, True, self.isQueued, datas)
         return msg, self._decode_indexQueue
+
+
+    @M1_protocol.cmd
+    def dynamicMotionParameter(self):
+        return M1_msg.build_msg(202), self._decode_dynamicMotionParameter
+
+
+
+    @M1_protocol.cmd
+    def setDynamicMotionParameter(self,pd:Param_dynamic ):
+        payload = struct.pack("<fffffffff",pd.zz1,pd.fs1,pd.fv1,pd.zz2,pd.mx2,pd.my2,pd.ia2,pd.fs2,pd.fv2 )
+        return M1_msg.build_msg(202, True, False, payload)
+
+    def _decode_dynamicMotionParameter(self, msg) -> Param_dynamic:
+        _id, write, isqueued, payload = M1_msg.decode_msg(msg)
+        pd = Param_dynamic()
+        pd.zz1,pd.fs1,pd.fv1,pd.zz2,pd.mx2,pd.my2,pd.ia2,pd.fs2,pd.fv2 = struct.unpack("<fffffffff", payload)
+        return pd
+

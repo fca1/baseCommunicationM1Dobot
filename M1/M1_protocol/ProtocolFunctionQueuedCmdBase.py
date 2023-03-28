@@ -32,7 +32,7 @@ class ProtocolFunctionQueuedCmdBase(M1_protocol):
 
     @M1_protocol.cmd
     def queuedCmdCurrentIndex(self):
-        msg = M1_msg.build_msg(246, True)
+        msg = M1_msg.build_msg(246)
         return msg, self._decode_queuedCmdCurrentIndex
 
     def _decode_queuedCmdCurrentIndex(self, msg: bytearray) -> tuple[Any, ...]:

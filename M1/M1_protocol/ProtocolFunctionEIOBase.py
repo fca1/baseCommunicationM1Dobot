@@ -8,7 +8,7 @@ class ProtocolFunctionEIOBase(M1_protocol):
 
     @M1_protocol.cmd
     def do(self):
-        msg = M1_msg.build_msg(131, self.isQueued)
+        msg = M1_msg.build_msg(131,False, self.isQueued)
         return msg, self._decode_do
 
     @M1_protocol.cmd

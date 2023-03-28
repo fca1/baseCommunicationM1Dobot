@@ -39,7 +39,7 @@ class ProtocolFunctionJOGBase(M1_protocol):
 
     @M1_protocol.cmd
     def jogJointParams(self):
-        return M1_msg.build_msg(70, True),self._decode_jogJointParams
+        return M1_msg.build_msg(70),self._decode_jogJointParams
 
 
     @M1_protocol.cmd
@@ -55,7 +55,7 @@ class ProtocolFunctionJOGBase(M1_protocol):
 
     @M1_protocol.cmd
     def jogCoordinateParams(self):
-        return M1_msg.build_msg(71, True),self._decode_jogCoordinateParams
+        return M1_msg.build_msg(71),self._decode_jogCoordinateParams
 
 
 
@@ -68,7 +68,7 @@ class ProtocolFunctionJOGBase(M1_protocol):
 
     @M1_protocol.cmd
     def jogCommonParams(self):
-        return  M1_msg.build_msg(72, True,self.isQueued), self._decode_indexQueue
+        return  M1_msg.build_msg(72, False,self.isQueued), self._decode_indexQueue
 
 
 

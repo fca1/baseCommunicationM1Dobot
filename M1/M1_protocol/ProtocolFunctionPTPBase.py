@@ -16,7 +16,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
         mode, the issued command packet is shown in Table 68, and the returned command packet
         is shown in Table 69.
         """
-        return M1_msg.build_msg(80, True), self._decode_ptpJointParams
+        return M1_msg.build_msg(80), self._decode_ptpJointParams
 
     @M1_protocol.cmd
     def ptpCoordinateParams(self):
@@ -26,7 +26,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
         packet is shown in Table 71.
         :return:
         """
-        return M1_msg.build_msg(81, True), self._decode_ptpCoordinateParams
+        return M1_msg.build_msg(81), self._decode_ptpCoordinateParams
 
     @M1_protocol.cmd
     def setPtpJointParams(self, velocity: Velocity, acceleration: Acceleration):
