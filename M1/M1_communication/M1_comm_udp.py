@@ -16,7 +16,9 @@ class M1_comm_udp:
         try:
             msgFromServer = self.client.recvfrom(self.bufferSize)
         except socket.timeout as e:
-            raise Exception(f"Timeout msg: {bytesToSend.hex()}")
+
+            raise TimeoutError(f"Timeout msg: {bytesToSend.hex()}")
+            pass
 
         return msgFromServer[0]
 
