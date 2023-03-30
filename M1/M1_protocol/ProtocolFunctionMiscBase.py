@@ -80,3 +80,8 @@ class ProtocolFunctionMiscBase(M1_protocol):
     def _decode_securityLevelConfiguration(self,msg):
         tolerateJ1, tolerateJ2, tolerateJ3, tolerateJ4 = struct.unpack("<ffff",msg)
         return tolerateJ1, tolerateJ2, tolerateJ3, tolerateJ4
+
+    @M1_protocol.cmd
+    def setRecoveryMode(self,recoveryAfter5sec:bool):
+        payload = struct.pack("<BB", 1, recoveryAfter5sec)
+        return M1_msg.build_msg(208, True, False,payload)
