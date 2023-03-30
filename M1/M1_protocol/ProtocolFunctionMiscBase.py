@@ -11,15 +11,17 @@ from M1.misc.PositionArm import PositionArm
 class Param_dynamic:
     # LEs parametres par defaut, sont issus du test fait avec DOBOT M1
     # ce n'est pas publie pour trouver les valeurs.
-    zz1:float=0.2617
-    fs1:float=0.0565
-    fv1:float=0.0459
-    zz2:float=7.4010
-    mx2:float=0.2404
-    my2:float=3.0811
-    ia2:float=1.6345
-    fs2:float=-0.0198
-    fv2:float=1.9735
+
+
+    zz1:float=0.30660000443458557
+    fs1:float=0.05920000001788139
+    fv1:float=0.07440000027418137
+    zz2:float=7.1427998542785645
+    mx2:float=0.3237999975681305
+    my2:float=3.0055999755859375
+    ia2:float=1.7759000062942505
+    fs2:float=-0.010999999940395355
+    fv2:float=8559000492095947
 
 
 class ProtocolFunctionMiscBase(M1_protocol):
@@ -65,7 +67,15 @@ class ProtocolFunctionMiscBase(M1_protocol):
     def setDynamicPayload(self,charge_kg:float ):
         payload = struct.pack("<f", charge_kg )
         return M1_msg.build_msg(203, True, False, payload)
+    @M1_protocol.cmd
+    def dynamicPayload(self):
 
+        return M1_msg.build_msg(203),self._decode_dynamicPayload
+
+    def _decode_dynamicPayload(self,msg):
+        _id, write, isqueued, payload = M1_msg.decode_msg(msg)
+        charge_kg = struct.unpack("<f",payload)
+        return charge_kg
 
     @M1_protocol.cmd
     def setSecurityLevelConfiguration(self,tolerateJ1:float,tolerateJ2:float,tolerateJ3:float,tolerateJ4:float):
@@ -78,10 +88,20 @@ class ProtocolFunctionMiscBase(M1_protocol):
         return M1_msg.build_msg(201, True, False),self._decode_securityLevelConfiguration
 
     def _decode_securityLevelConfiguration(self,msg):
-        tolerateJ1, tolerateJ2, tolerateJ3, tolerateJ4 = struct.unpack("<ffff",msg)
+        _id, write, isqueued, payload = M1_msg.decode_msg(msg)
+        tolerateJ1, tolerateJ2, tolerateJ3, tolerateJ4 = struct.unpack("<ffff",payload)
         return tolerateJ1, tolerateJ2, tolerateJ3, tolerateJ4
 
     @M1_protocol.cmd
-    def setRecoveryMode(self,recoveryAfter5sec:bool):
-        payload = struct.pack("<BB", 1, recoveryAfter5sec)
+    def setRecoveryMode(self, enableImmediatly:bool):
+        payload = struct.pack("<B", enableImmediatly)
         return M1_msg.build_msg(208, True, False,payload)
+
+    @M1_protocol.cmd
+    def recoveryMode(self):
+        return M1_msg.build_msg(208),self._decode_recoveryMode
+
+    def _decode_recoveryMode(self,msg):
+        _id, write, isqueued, payload = M1_msg.decode_msg(msg)
+        p1 = struct.unpack("<B", payload)
+        return p1

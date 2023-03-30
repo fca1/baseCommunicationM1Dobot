@@ -43,7 +43,7 @@ class M1_protocol:
         return send_rcve
         pass
 
-
+@dataclass
 class Acceleration:
     x: float
     y: float
@@ -56,10 +56,19 @@ class Acceleration:
 
 @dataclass
 class Velocity:
-    x: float
-    y: float
-    z: float
-    r: float
+    x: float =180
+    y: float =180
+    z: float =1000
+    r: float =1000
+
+    def __mul__(self, other):
+        self.x*=other
+        self.y *= other
+        self.z *= other
+        self.r *= other
+
+    def __truediv__(self, other):
+        return self*(1/other)
 
     def __repr__(self):
         return f"Velocity x={round(self.x)}%,y={round(self.y)}%,z={round(self.z)}%,r={round(self.r)}%"

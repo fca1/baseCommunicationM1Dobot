@@ -42,10 +42,13 @@ if 1:
     p1 = PositionArm(-200, 0, 230) + homing_position
     protocol.miscBase.setUserFrame(p1, p0)  # user tool
 
-if 0:
+if 1:
     pm  = Param_dynamic()
-    protocol.miscBase.dynamicMotionParameter(pm)
-    protocol.miscBase.setDynamicPayload(1.0)
+    protocol.miscBase.recoveryMode()
+    protocol.miscBase.setDynamicMotionParameter(pm)
+    protocol.ptpBase.ptpJointParams()
+    protocol.miscBase.setDynamicPayload(1.1)
+    # 0,0,0,0
     protocol.miscBase.setSecurityLevelConfiguration(0,0,0,0)
     protocol.miscBase.setRecoveryMode(False)
 
