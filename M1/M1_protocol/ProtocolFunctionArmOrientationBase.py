@@ -33,7 +33,7 @@ class ProtocolFunctionArmOrientationBase(M1_protocol):
         else:
             datas = struct.pack('<Bffff', mode.value, pos.base, pos.rear, pos.front, pos.defector)
         msg = M1_msg.build_msg(84, True, self.isQueued, datas)
-        return msg
+        return msg, self._decode_indexQueue
 
     @M1_protocol.cmd
     def setArmOrientation(self, right: bool):

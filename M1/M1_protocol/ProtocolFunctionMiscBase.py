@@ -29,8 +29,8 @@ class ProtocolFunctionMiscBase(M1_protocol):
         super().__init__()
 
     @M1_protocol.cmd
-    def setToolFrame(self, length_arm, axe_arm, height):
-        datas = struct.pack('<ffff', axe_arm, length_arm, height, 0)
+    def setToolFrame(self, length_arm:float, axe_arm:float, height:float):
+        datas = struct.pack('<ffff', length_arm, axe_arm, height,0)
         msg = M1_msg.build_msg(251, True, self.isQueued, datas)
         return msg, self._decode_indexQueue
 
@@ -85,7 +85,7 @@ class ProtocolFunctionMiscBase(M1_protocol):
 
     @M1_protocol.cmd
     def securityLevelConfiguration(self):
-        return M1_msg.build_msg(201, True, False),self._decode_securityLevelConfiguration
+        return M1_msg.build_msg(201),self._decode_securityLevelConfiguration
 
     def _decode_securityLevelConfiguration(self,msg):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
