@@ -25,7 +25,7 @@ class M1_msg:
     def build_msg(_id: int, write: bool = False, isQueued: bool = False, params: bytes = bytearray()) -> (bytearray,bool):
         askQueued = bool(isQueued)
         payload = M1_msg._build_payload(_id, write, askQueued, params)
-        return M1_msg._build_msg(payload),askQueued
+        return M1_msg._build_msg(payload)
 
     @staticmethod
     def decode_msg(msg: bytearray) -> (int, int, bool, bytearray):
