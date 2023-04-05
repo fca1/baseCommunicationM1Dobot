@@ -64,6 +64,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
         msg = M1_msg.build_msg(83, True, self.isQueued, payload)
         return msg, self._decode_indexQueue
 
+    @M1_protocol.cmd
     def ptpJumpParams(self):
         """
         float jumpHeight; //Lifting height in Jump mode
