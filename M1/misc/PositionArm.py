@@ -28,3 +28,6 @@ class PositionArm:
 
     def save(self,file):
         return pickle.load(file)
+
+    def copy(self):
+        return PositionArm(self.x,self.y,self.z,self.r)

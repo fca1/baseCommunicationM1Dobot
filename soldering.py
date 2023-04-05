@@ -51,11 +51,13 @@ class Soldering:
         self.protocol.hhtBase.setHttTrigOutputEnabled(False)
         # Mettre l'origine a 200
         homing_position = PositionArm(*self.PT_EXTENDED)
-        p0 = PositionArm(200, 0, self.MAX_HEIGHT) + homing_position
-        p1 = PositionArm(-200, 0, self.MAX_HEIGHT) + homing_position
+        p0 = PositionArm(200, 0, -self.MAX_HEIGHT) + homing_position
+        p1 = PositionArm(-200, 0, -self.MAX_HEIGHT) + homing_position
         self.protocol.miscBase.setUserFrame(p1, p0)  # user tool
-        offset0 = AngleArm(0,0,self.MAX_HEIGHT,self.initialAngleDefector)
+
+        offset0 = AngleArm(1,1,self.MAX_HEIGHT,self.initialAngleDefector)
         self.protocol.armOrientationBase.setPTPCmd(offset0,E_ptpMode.MOVJ_ANGLE)
+        self.wait_idle()
 
     def initialize_length_defector(self):
         self.protocol.miscBase.setToolFrame(70,0,0)

@@ -21,9 +21,13 @@ class SolderEcolow(Soldering):
 
     def __init__(self,ip_addr="192.168.0.55"):
         super().__init__(ip_addr=ip_addr)
-        self.heigth_pcb = self.MAX_HEIGHT       # doit etre choisi.
-        self.origin_connector = PositionArm()   # @TODO initialiser avec valeur
-        self.clean_solder = PositionArm()   # @TODO initialiser avec valeur
+        self.heigth_pcb = 100       # doit etre choisi.
+        self.origin_connector = PositionArm(100,100,self.heigth_pcb)   # @TODO initialiser avec valeur
+        self.clean_solder = PositionArm(-100,-100,200)   # @TODO initialiser avec valeur
+        self.place_to_home()
+        self.initialize_arm()
+        self._configure_jumpJ()
+        pass
 
 
     def _configure_jumpJ(self):
@@ -87,6 +91,7 @@ class SolderEcolow(Soldering):
         point = self.clean_solder.copy()
         low_ = PositionArm(0,0,-20,0)
         high_ = PositionArm(0,0,-low_.z,0)
+        self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ)
         self.protocol.armOrientationBase.queued.setPTPCmd(low_, E_ptpMode.MOVJ_XYZ_INC)
         self.protocol.armOrientationBase.queued.setPTPCmd(high_, E_ptpMode.MOVJ_XYZ_INC)
 
@@ -97,3 +102,7 @@ class SolderEcolow(Soldering):
         pass
 
 
+if __name__ == '__main__':
+    solder = SolderEcolow()
+    solder.cycle_clean_solder()
+    pass

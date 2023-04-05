@@ -53,6 +53,8 @@ class JogM1:
 
 if __name__ == '__main__':
     solder = Soldering()
+    solder.place_to_home()
+    solder.initialize_arm()
     with JogM1(solder.protocol) as jog:
         while True:
             bleft,bright = jog.read()
