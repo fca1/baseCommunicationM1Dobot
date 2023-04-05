@@ -1,4 +1,8 @@
 import os
+
+path_root = r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\3dconnexion\dll\x64"
+os.environ['PATH'] += path_root
+
 import pyspacemouse
 
 from M1.CommProtocolM1 import CommProtocolM1
@@ -9,8 +13,6 @@ from soldering import Soldering
 class JogM1:
     def __init__(self,protocol:CommProtocolM1):
         self.protocol = protocol
-        path_root = r";C:\Users\frant\PycharmProjects\3dconnexion\dll\x64"
-        os.environ['PATH'] += path_root
 
     def __enter__(self):
         success = pyspacemouse.open(dof_callback=None, button_callback=None,
@@ -27,20 +29,21 @@ class JogM1:
 
     def read(self):
         factor = 0.2
+        level_min = 0.1
         status =  pyspacemouse.read()
-        if status.x:
+        if abs(status.x)>level_min:
             self.protocol.jogBase.queued.setJOGCommonParams(abs(status.x)*factor*100,20)
             self.protocol.jogBase.queued.setJOGCmd(E_KEY.YP_DOWN if status.x >0 else E_KEY.YN_DOWN,True)
             return
-        if status.y:
+        if abs(status.y)>level_min:
             self.protocol.jogBase.queued.setJOGCommonParams(abs(status.y)*factor*100,20)
             self.protocol.jogBase.queued.setJOGCmd(E_KEY.XP_DOWN if status.y >0 else E_KEY.XN_DOWN,True)
             return
-        if status.z:
+        if abs(status.z)>level_min:
             self.protocol.jogBase.queued.setJOGCommonParams(abs(status.z)*factor*100,20)
             self.protocol.jogBase.queued.setJOGCmd(E_KEY.ZP_DOWN if status.z >0 else E_KEY.ZN_DOWN,True)
             return
-        if status.yaw:
+        if abs(status.yaw)>level_min:
             self.protocol.jogBase.queued.setJOGCommonParams(abs(status.yaw) * factor * 100, 20)
             self.protocol.jogBase.queued.setJOGCmd(E_KEY.RP_DOWN if status.z > 0 else E_KEY.RN_DOWN, False)
             return

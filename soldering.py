@@ -1,3 +1,4 @@
+import logging
 import time
 
 from M1.CommProtocolM1 import CommProtocolM1
@@ -22,6 +23,7 @@ class Soldering:
         self.protocol.queueCmdBase.setQueuedCmdForceStopExec()
         self.protocol.queueCmdBase.setQueuedCmdClear()
         self.protocol.queueCmdBase.setQueuedCmdStartExec()
+        pass
 
     def wait_idle(self):
         # protocol.homeBase.setHome()
@@ -32,12 +34,14 @@ class Soldering:
         try:
             # Initialiser le systeme de communication udp
             # Detection presence du M1
+            reason = self.protocol.alarm
             if reason:
                 print(f"Erreur sur le M1: error ={reason}")
                 self.protocol.alarmBase.clearAllAlarmsState()
             serial = self.protocol.serial()
             return bool(serial)
-        except:
+        except Exception as e:
+            logging.warning(f"Pb {e}")
             return False
 
 

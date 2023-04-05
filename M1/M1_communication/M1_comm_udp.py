@@ -1,7 +1,5 @@
-import logging
 import socket
 from threading import Lock
-from typing import Callable, Any
 
 
 class M1_comm_udp:
@@ -25,10 +23,7 @@ class M1_comm_udp:
                 raise TimeoutError(f"Timeout msg: {bytesToSend.hex()}")
             pass
 
-    def hookQueuedMsg(msg:bytes, decode_fcnt:Callable) -> Any:
-        logging.debug(f"Message: {msg} for queued")
-        return None
-
+        return msgFromServer[0]
 
     def cmd(self, msg_or_tuple: bytes) -> ...:
         """
@@ -36,16 +31,8 @@ class M1_comm_udp:
         :param msg_or_tuple:
         :return: la donnée brute du robot si decode est None sinon variable selon decode.
         """
-        msg,askQueued, decode_fcnt = (*msg_or_tuple,) if not isinstance(msg_or_tuple, bytes) else (msg_or_tuple,False, None)
-        flg_hook = None
-        if askQueued:
-            # Il est interessant de pouvoir faire autre chose des messages en destination de queued
-            flg_hook = self.hookQueuedMsg(msg,decode_fcnt)
-            if flg_hook:
-                return flg_hook
-        answer = self.send_msg(msg)
-        assert askQueued and decode_fcnt            # Toujours une fonction de decodage si queue.
+        x,askQueued, decode_fcnt = (*msg_or_tuple,) if not isinstance(msg_or_tuple, bytes) else (msg_or_tuple,False, None)
+        answer = self.send_msg(x)
         if decode_fcnt:
             return decode_fcnt(answer)
         return answer
-

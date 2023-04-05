@@ -1,5 +1,5 @@
 import os
-path_root = r";C:\Users\frant\PycharmProjects\3dconnexion\dll\x64"
+path_root = r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\3dconnexion\dll\x64"
 os.environ['PATH'] += path_root
 
 
@@ -24,11 +24,12 @@ def callback():
                   pyspacemouse.ButtonCallback([1], lambda state, buttons, pressed_buttons: print("Button: 1")),
                   pyspacemouse.ButtonCallback([0, 1], button_0_1), ]
 
-    success = pyspacemouse.open(dof_callback=pyspacemouse.print_state, button_callback=someButton,
+    success = pyspacemouse.open(dof_callback=None, button_callback=someButton,
                                 button_callback_arr=button_arr)
     if success:
         while True:
-            pyspacemouse.read()
+            x = pyspacemouse.read()
+            print(x.roll,x.pitch)
             time.sleep(0.01)
 
 
