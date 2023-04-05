@@ -84,7 +84,13 @@ class SolderEcolow(Soldering):
 
     def cycle_clean_solder(self):
         # faire un cycle de nettoyage
-        self.protocol.armOrientationBase.queued.setPTPCmd(self.clean_solder, E_ptpMode.MOVJ_XYZ)
+        point = self.clean_solder.copy()
+        low_ = PositionArm(0,0,-20,0)
+        high_ = PositionArm(0,0,-low_.z,0)
+        self.protocol.armOrientationBase.queued.setPTPCmd(low_, E_ptpMode.MOVJ_XYZ_INC)
+        self.protocol.armOrientationBase.queued.setPTPCmd(high_, E_ptpMode.MOVJ_XYZ_INC)
+
+
 
 
     def start_cycle(self):
