@@ -2,7 +2,7 @@ import time
 
 from M1.M1_protocol.ProtocolFunctionArmOrientationBase import E_ptpMode
 from M1.misc.PositionArm import PositionArm
-from main import Soldering
+from soldering import Soldering
 
 
 class SolderEcolow(Soldering):

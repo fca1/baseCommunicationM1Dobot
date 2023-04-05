@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+import pickle
 
 
 @dataclass
@@ -21,3 +22,9 @@ class PositionArm:
         self.z -= other.z
         self.r -= other.r
         return self
+
+    def load(self,file):
+        return pickle.dump(self,file=file)
+
+    def save(self,file):
+        return pickle.load(file)
