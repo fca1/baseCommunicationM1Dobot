@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 import pickle
 
@@ -31,3 +32,6 @@ class PositionArm:
 
     def copy(self):
         return PositionArm(self.x,self.y,self.z,self.r)
+
+    def distance(self,other) -> float :
+        return math.sqrt((self.x-other.x)**2 + (self.y-other.y)**2)

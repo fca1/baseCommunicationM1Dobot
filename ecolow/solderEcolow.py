@@ -64,15 +64,23 @@ class SolderEcolow(M1):
 
 
     def cycle_solder_board(self,origin_connector:PositionArm):
+        positions = set()
         for x in range(self.MATRIX_CONNECTORS[0]):
             for y in range(self.MATRIX_CONNECTORS[1]):
                 # positionner la tete
                 point = origin_connector.copy()
                 point.x+=x*self.DIST_BETWEEN_CNX_X
                 point.y += y * self.DIST_BETWEEN_CNX_Y
-                self.protocol.ptpBase.queued.setPtpCommonParams(50, 50)
-                self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ)
-                self.cycle_solder_pins(point)
+                positions.add(point)
+        # positions contient toutes les positions en attente;
+        while positions:
+            current = self.pos
+            tried_positions = sorted(positions,key=current.distance)
+            point = tried_positions[0]
+            positions.remove(point)
+            self.protocol.ptpBase.queued.setPtpCommonParams(50, 50)
+            self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ)
+            self.cycle_solder_pins(point)
         pass
 
 
@@ -121,7 +129,7 @@ class SolderEcolow(M1):
 
 
 if __name__ == '__main__':
-    solder = SolderEcolow(home=True)
+    solder = SolderEcolow(home=False)
     #solder.cycle_clean_solder()
     origin_connector = PositionArm(273, -311, solder.heigth_pcb+solder.HEIGHT_PIN_SECURITY)  # @TODO initialiser avec valeur
     solder.cycle_solder_board(origin_connector)
