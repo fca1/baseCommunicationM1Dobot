@@ -7,7 +7,7 @@ from M1.misc.AngleArm import AngleArm
 from M1.misc.PositionArm import PositionArm
 
 
-class Soldering:
+class M1:
     MAX_HEIGHT=234
     PT_EXTENDED=(400,0,MAX_HEIGHT,0)
     def __init__(self,ip_addr="192.168.0.55"):
@@ -44,28 +44,27 @@ class Soldering:
             logging.warning(f"Pb {e}")
             return False
 
-
-    def place_to_home(self):
-        # Mettre alimentation sur le robot
-        self.protocol.ptpBase.setPtpCommonParams(50, 50)
-        self.protocol.hhtBase.setHttTrigOutputEnabled(False)
+    def initialize_origin(self):
         # Mettre l'origine a 200
         homing_position = PositionArm(*self.PT_EXTENDED)
         p0 = PositionArm(200, 0, -self.MAX_HEIGHT) + homing_position
         p1 = PositionArm(-200, 0, -self.MAX_HEIGHT) + homing_position
         self.protocol.miscBase.setUserFrame(p1, p0)  # user tool
 
-        offset0 = AngleArm(1,1,self.MAX_HEIGHT,self.initialAngleDefector)
+    def home(self):
+        # Mettre alimentation sur le robot
+        self.protocol.ptpBase.setPtpCommonParams(50, 50)
+        self.protocol.hhtBase.setHttTrigOutputEnabled(False)
+        offset0 = AngleArm(0,0,self.MAX_HEIGHT,self.initialAngleDefector)
         self.protocol.armOrientationBase.setPTPCmd(offset0,E_ptpMode.MOVJ_ANGLE)
         self.wait_idle()
 
-    def initialize_length_defector(self):
-        self.protocol.miscBase.setToolFrame(70,0,0)
-        self.protocol.armOrientationBase.setPTPCmd(PositionArm(250, 0, 0, self.initialAngleDefector), E_ptpMode.MOVJ_XYZ)
+    def initialize_length_defector(self,length):
+        self.protocol.miscBase.setToolFrame(length,0,0)
 
-    def initialize_arm(self):
+    def initialize_arm(self,right=True):
         # Choisir une orientation et passer sur un point intermediaire apres avoir géré acceleration
-        self.protocol.armOrientationBase.queued.setArmOrientation(True)
+        self.protocol.armOrientationBase.queued.setArmOrientation(right)
 
     def wait_end_queue(self,index_wait:int):
         while (index_wait > self.protocol.queueCmdBase.queuedCmdCurrentIndex()):

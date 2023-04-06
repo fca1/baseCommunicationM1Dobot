@@ -2,10 +2,10 @@ import time
 
 from M1.M1_protocol.ProtocolFunctionArmOrientationBase import E_ptpMode
 from M1.misc.PositionArm import PositionArm
-from soldering import Soldering
+from m1 import M1
 
 
-class SolderEcolow(Soldering):
+class SolderEcolow(M1):
     # en mm
     MATRIX_CONNECTORS=(5,2)
     DIST_BETWEEN_CNX_X=45.65
@@ -24,7 +24,8 @@ class SolderEcolow(Soldering):
         self.heigth_pcb = 100       # doit etre choisi.
         self.origin_connector = PositionArm(100,100,self.heigth_pcb)   # @TODO initialiser avec valeur
         self.clean_solder = PositionArm(-100,-100,200)   # @TODO initialiser avec valeur
-        self.place_to_home()
+        self.initialize_origin()
+        self.home()
         self.initialize_arm()
         self._configure_jumpJ()
         pass
@@ -32,7 +33,7 @@ class SolderEcolow(Soldering):
 
     def _configure_jumpJ(self):
         # 2 plafonds sont prévus et mesurés. (la hauteur de securite et celle de déplacement)
-        self.protocol.ptpBase.queued.setPtpJumpParams(self.heigth_pcb+self.HEIGHT_PIN_SECURITY,self.heigth_pcb+2*self.HEIGHT_PIN_SECURITY)
+        self.protocol.ptpBase.setPtpJumpParams(self.heigth_pcb+self.HEIGHT_PIN_SECURITY,self.heigth_pcb+2*self.HEIGHT_PIN_SECURITY)
 
 
 

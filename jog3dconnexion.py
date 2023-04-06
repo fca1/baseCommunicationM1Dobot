@@ -7,7 +7,7 @@ import pyspacemouse
 
 from M1.CommProtocolM1 import CommProtocolM1
 from M1.M1_protocol.ProtocolFunctionJOGBase import E_KEY
-from soldering import Soldering
+from m1 import M1
 
 
 class JogM1:
@@ -52,8 +52,8 @@ class JogM1:
 
 
 if __name__ == '__main__':
-    solder = Soldering()
-    solder.place_to_home()
+    solder = M1()
+    solder.home()
     solder.initialize_arm()
     with JogM1(solder.protocol) as jog:
         while True:
