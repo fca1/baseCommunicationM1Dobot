@@ -19,8 +19,8 @@ class SolderEcolow(M1):
     DIST_BETWEEN_PINS_Y =9.12
     HEIGHT_PIN_SECURITY=5   # hauteur relative par rapport au PCB
 
-    OUTPUT_CMD_DISTRIBUTE=1 # Commande pour demander soudure au distributeur
-    INPUT_CMD_DISTRIBUTE=1
+    OUTPUT_CMD_DISTRIBUTE=20 # Commande pour demander soudure au distributeur
+    INPUT_CMD_DISTRIBUTE=18
 
     # En passant par la fonction JUMP, il est possible de pouvoir choisir 2 planchers.
     # Plancher interdisant de varier (X,Y)
@@ -135,7 +135,7 @@ class SolderEcolow(M1):
 
 
 if __name__ == '__main__':
-    solder = SolderEcolow(home=False)
+    solder = SolderEcolow(home=True)
     #solder.cycle_clean_solder()
     origin_connector = PositionArm(273, -311, solder.heigth_pcb+solder.HEIGHT_PIN_SECURITY)  # @TODO initialiser avec valeur
     solder.cycle_solder_board(origin_connector)

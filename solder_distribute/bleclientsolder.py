@@ -29,9 +29,10 @@ class BleClientSolder(BleakClient):
 
 
 
-    async def wait_solder(self, pcent:int=0,time_ms:int=0, timeout=15):
+    async def wait_solder(self, pcent:int=0,time_ms:int=0, timeout=8):
         self.ans=None
         evt = asyncio.Event()
+        assert -100<=pcent<=100
 
         def notification_handler(_, data):
             logger.debug(f"notification {data}")
@@ -41,7 +42,7 @@ class BleClientSolder(BleakClient):
 
         try:
             await self.start_notify(self._solderUUID, notification_handler)
-            await self.write_gatt_char(self._solderUUID, f"{pcent},{time_ms}".encode(), response=False)
+            await self.write_gatt_char(self._solderUUID, f"{int(pcent)},{int(time_ms)}".encode(), response=False)
             await asyncio.wait_for(evt.wait(), timeout)
         except asyncio.exceptions.TimeoutError as e:
             logger.debug("pas de reponse")
