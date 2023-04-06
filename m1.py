@@ -47,17 +47,20 @@ class M1:
     def initialize_origin(self):
         # Mettre l'origine a 200
         homing_position = PositionArm(*self.PT_EXTENDED)
-        p0 = PositionArm(200, 0, -self.MAX_HEIGHT) + homing_position
-        p1 = PositionArm(-200, 0, -self.MAX_HEIGHT) + homing_position
+        p0 = PositionArm(-400, 0, -self.MAX_HEIGHT) + homing_position
+        p1 = PositionArm(0, 0, -self.MAX_HEIGHT) + homing_position
         self.protocol.miscBase.setUserFrame(p1, p0)  # user tool
 
     def home(self):
         # Mettre alimentation sur le robot
-        self.protocol.ptpBase.setPtpCommonParams(50, 50)
-        self.protocol.hhtBase.setHttTrigOutputEnabled(False)
+        self.protocol.ptpBase.queued.setPtpCommonParams(50, 50)
+        self.protocol.hhtBase.queued.setHttTrigOutputEnabled(False)
+        # monter la tete sans rien faire d'autre
+        offset0 = self.protocol.angle
+        offset0.front = self.MAX_HEIGHT
+        self.protocol.armOrientationBase.queued.setPTPCmd(offset0, E_ptpMode.MOVJ_ANGLE)
         offset0 = AngleArm(0,0,self.MAX_HEIGHT,self.initialAngleDefector)
-        self.protocol.armOrientationBase.setPTPCmd(offset0,E_ptpMode.MOVJ_ANGLE)
-        self.wait_idle()
+        self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(offset0,E_ptpMode.MOVJ_ANGLE))
 
     def initialize_length_defector(self,length):
         self.protocol.miscBase.setToolFrame(length,0,0)
@@ -69,3 +72,26 @@ class M1:
     def wait_end_queue(self,index_wait:int):
         while (index_wait > self.protocol.queueCmdBase.queuedCmdCurrentIndex()):
             time.sleep(0.2)
+
+    @property
+    def pos(self)->PositionArm:
+        return self.protocol.pos
+
+if __name__ == '__main__':
+    m1 = M1()
+    m1.initialize_origin()
+    m1.home()
+    m1.initialize_arm()
+    # Mettre la hauteur frontiere a 200 et 220
+    m1.protocol.ptpBase.queued.setPtpJumpParams(20,150)
+    pos = m1.pos
+    pos.z = 100
+    m1.protocol.ptpBase.queued.setPtpCommonParams(1, 6)
+    m1.protocol.armOrientationBase.queued.setPTPCmd(pos, E_ptpMode.MOVJ_XYZ)
+    pos.x = 100
+    pos.y = -100
+    m1.protocol.armOrientationBase.queued.setPTPCmd(pos, E_ptpMode.JUMP_XYZ)
+    pass
+
+
+

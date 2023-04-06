@@ -70,7 +70,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
         float jumpHeight; //Lifting height in Jump mode
         float zLimit; //Maximum lifting height in Jump mod
         """
-        return M1_msg.build_msg(82), self._decode_ptpJumpParams
+        return M1_msg.build_msg(82,False,self.isQueued), self._decode_ptpJumpParams
 
     def _decode_ptpJumpParams(self, msg) -> (int, int):
         """
@@ -78,19 +78,19 @@ class ProtocolFunctionPTPBase(M1_protocol):
         float zLimit; //Maximum lifting height in Jump mod
         """
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
-        jumpHeight, zLimit = struct.unpack("<ff", payload)
+        jumpHeight, zLimit,_ = struct.unpack("<fff", payload)
         return jumpHeight, zLimit
 
     @M1_protocol.cmd
-    def setPtpJumpParams(self, jumpHeight: float, zLimit: float):
+    def setPtpJumpParams(self, delta_jumpHeight: float, zLimit: float):
         """
         This command is to get the lifting height and the maximum lifting height in JUMP mode,
         the issued command packet is shown in Table 76, and the returned command packet is
         shown in Table 77
-        :param jumpHeight:
+        :param delta_jumpHeight:
         :param zLimit:
         :return:
         """
-        payload = struct.pack("<ff", jumpHeight, zLimit)
+        payload = struct.pack("<ff", delta_jumpHeight, zLimit)
         msg = M1_msg.build_msg(82, True, self.isQueued, payload)
         return msg, self._decode_indexQueue

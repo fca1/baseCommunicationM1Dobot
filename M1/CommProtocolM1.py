@@ -35,9 +35,15 @@ class CommProtocolM1(M1_comm_udp, ProtocolFunction):
         return self.deviceInfoBase.deviceSN()
 
     @property
-    def pos(self) -> (PositionArm, AngleArm):
+    def pos(self) -> PositionArm:
         x, y, z, r, *angle = self.poseBase.pose()
-        return PositionArm(x, y, z, r), AngleArm(*angle)
+        return PositionArm(x, y, z, r)
+
+    @property
+    def angle(self) -> AngleArm:
+        x, y, z, r, *angle = self.poseBase.pose()
+        return AngleArm(*angle)
+
 
     @property
     def status_ok(self) -> bool:
