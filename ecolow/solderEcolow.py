@@ -7,15 +7,19 @@ from m1 import M1
 
 class SolderEcolow(M1):
     # en mm
-    # Les signes negatifs sont pour le deplacement (selon x+ et y+
+    # Les signes negatifs sont pour le deplacement (selon x+ et y+)
+    # Dans le cas présent, la longueur la plus grande du PCB est Y.
+    # Description du PCB
     MATRIX_CONNECTORS=(2,5)
     DIST_BETWEEN_CNX_X =-72
     DIST_BETWEEN_CNX_Y=45.65
+    # description du connexteur
     MATRIX_INSIDE_CONNECTOR=(3,2)
     DIST_BETWEEN_PINS_X=-4.56
     DIST_BETWEEN_PINS_Y =9.12
-    HEIGHT_PIN_SECURITY=5
-    OUTPUT_CMD_DISTRIBUTE=1
+    HEIGHT_PIN_SECURITY=5   # hauteur relative par rapport au PCB
+
+    OUTPUT_CMD_DISTRIBUTE=1 # Commande pour demander soudure au distributeur
     INPUT_CMD_DISTRIBUTE=1
 
     # En passant par la fonction JUMP, il est possible de pouvoir choisir 2 planchers.
@@ -38,7 +42,9 @@ class SolderEcolow(M1):
 
     def _configure_jumpJ(self):
         # 2 plafonds sont prévus et mesurés. (la hauteur de securite et celle de déplacement)
-        self.protocol.ptpBase.setPtpJumpParams(self.HEIGHT_PIN_SECURITY,self.heigth_pcb+5*self.HEIGHT_PIN_SECURITY)
+        # Par rapport à la hauteur du PCB, monter l'outil de la sécurité avant d'avoir le droit de bouger en x,y
+        # Le plafond étant à la meme hauteur max, pas de variation en Z pendant le déplacement.
+        self.protocol.ptpBase.setPtpJumpParams(self.HEIGHT_PIN_SECURITY,self.heigth_pcb+self.HEIGHT_PIN_SECURITY)
         pass
 
 

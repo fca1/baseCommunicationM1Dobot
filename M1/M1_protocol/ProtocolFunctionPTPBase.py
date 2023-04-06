@@ -87,8 +87,8 @@ class ProtocolFunctionPTPBase(M1_protocol):
         This command is to get the lifting height and the maximum lifting height in JUMP mode,
         the issued command packet is shown in Table 76, and the returned command packet is
         shown in Table 77
-        :param delta_jumpHeight:
-        :param zLimit:
+        :param delta_jumpHeight:   (hauteur (relative) de dégagement avant de bouger en x,y
+        :param zLimit:              (hauteur de sécurité pour le deplacement x,y)
         :return:
         """
         payload = struct.pack("<ff", delta_jumpHeight, zLimit)
