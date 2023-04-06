@@ -24,7 +24,7 @@ class SolderEcolow(M1):
 
     # En passant par la fonction JUMP, il est possible de pouvoir choisir 2 planchers.
     # Plancher interdisant de varier (X,Y)
-
+    DEFECTOR_LENGTH = 45
 
 
 
@@ -36,6 +36,7 @@ class SolderEcolow(M1):
         if home:
             self.home()
         self.initialize_arm()
+        self.initialize_length_defector(self.DEFECTOR_LENGTH)
         self._configure_jumpJ()
         pass
 
@@ -120,8 +121,8 @@ class SolderEcolow(M1):
 
 
 if __name__ == '__main__':
-    solder = SolderEcolow(home=False)
+    solder = SolderEcolow(home=True)
     #solder.cycle_clean_solder()
-    origin_connector = PositionArm(100, -100, solder.heigth_pcb+solder.HEIGHT_PIN_SECURITY)  # @TODO initialiser avec valeur
+    origin_connector = PositionArm(273, -311, solder.heigth_pcb+solder.HEIGHT_PIN_SECURITY)  # @TODO initialiser avec valeur
     solder.cycle_solder_board(origin_connector)
     pass

@@ -11,8 +11,9 @@ from m1 import M1
 
 
 class JogM1:
-    def __init__(self,protocol:CommProtocolM1):
-        self.protocol = protocol
+    def __init__(self,m1:M1):
+        self.protocol = m1.protocol
+        self.m1 = m1
 
     def __enter__(self):
         success = pyspacemouse.open(dof_callback=None, button_callback=None,
@@ -28,34 +29,41 @@ class JogM1:
         pass
 
     def read(self):
-        factor = 0.2
+        factor = 0.5
         level_min = 0.1
         status =  pyspacemouse.read()
-        if abs(status.x)>level_min:
-            self.protocol.jogBase.queued.setJOGCommonParams(abs(status.x)*factor*100,20)
-            self.protocol.jogBase.queued.setJOGCmd(E_KEY.YP_DOWN if status.x >0 else E_KEY.YN_DOWN,True)
-            return
-        if abs(status.y)>level_min:
-            self.protocol.jogBase.queued.setJOGCommonParams(abs(status.y)*factor*100,20)
-            self.protocol.jogBase.queued.setJOGCmd(E_KEY.XP_DOWN if status.y >0 else E_KEY.XN_DOWN,True)
-            return
-        if abs(status.z)>level_min:
-            self.protocol.jogBase.queued.setJOGCommonParams(abs(status.z)*factor*100,20)
-            self.protocol.jogBase.queued.setJOGCmd(E_KEY.ZP_DOWN if status.z >0 else E_KEY.ZN_DOWN,True)
-            return
-        if abs(status.yaw)>level_min:
-            self.protocol.jogBase.queued.setJOGCommonParams(abs(status.yaw) * factor * 100, 20)
-            self.protocol.jogBase.queued.setJOGCmd(E_KEY.RP_DOWN if status.z > 0 else E_KEY.RN_DOWN, False)
-            return
-        self.protocol.jogBase.queued.setJOGCmd(E_KEY.IDLE, True)
-        return status.buttons
+        index = None
+        try:
+            if abs(status.x)>level_min:
+                self.protocol.jogBase.queued.setJOGCommonParams(abs(status.x)*factor*100,20)
+                index=  self.protocol.jogBase.queued.setJOGCmd(E_KEY.YP_DOWN if status.x >0 else E_KEY.YN_DOWN,True)
+                return status.buttons
+            if abs(status.y)>level_min:
+                self.protocol.jogBase.queued.setJOGCommonParams(abs(status.y)*factor*100,20)
+                index=  self.protocol.jogBase.queued.setJOGCmd(E_KEY.XP_DOWN if status.y >0 else E_KEY.XN_DOWN,True)
+                return status.buttons
+            if abs(status.z)>level_min:
+                self.protocol.jogBase.queued.setJOGCommonParams(abs(status.z)*factor*100,20)
+                index=  self.protocol.jogBase.queued.setJOGCmd(E_KEY.ZP_DOWN if status.z >0 else E_KEY.ZN_DOWN,True)
+                return status.buttons
+            if abs(status.yaw)>level_min:
+                self.protocol.jogBase.queued.setJOGCommonParams(abs(status.yaw) * factor * 100, 20)
+                index=  self.protocol.jogBase.queued.setJOGCmd(E_KEY.RP_DOWN if status.z > 0 else E_KEY.RN_DOWN, False)
+                return status.buttons
+            index= self.protocol.jogBase.queued.setJOGCmd(E_KEY.IDLE, True)
+            print("stop")
+            return status.buttons
+        finally:
+            self.m1.wait_end_queue(index)
+
+
 
 
 if __name__ == '__main__':
     solder = M1()
     solder.home()
     solder.initialize_arm()
-    with JogM1(solder.protocol) as jog:
+    with JogM1(solder) as jog:
         while True:
             bleft,bright = jog.read()
             if bleft:
