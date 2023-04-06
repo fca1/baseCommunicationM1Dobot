@@ -3,7 +3,7 @@ from dataclasses import dataclass
 import pickle
 
 
-@dataclass
+@dataclass(unsafe_hash=True)
 class PositionArm:
     x: float = 0
     y: float = 0

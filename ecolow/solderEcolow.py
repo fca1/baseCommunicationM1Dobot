@@ -52,14 +52,21 @@ class SolderEcolow(M1):
 
 
     def cycle_solder_pins(self,initial_point:PositionArm):
+        positions = set()
         for x in range(self.MATRIX_INSIDE_CONNECTOR[0]):
             for y in range(self.MATRIX_INSIDE_CONNECTOR[1]):
                 point = initial_point.copy()
                 point.x+=x*self.DIST_BETWEEN_PINS_X
                 point.y += y * self.DIST_BETWEEN_PINS_Y
-                self.protocol.ptpBase.queued.setPtpCommonParams(5, 5)
-                self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ)
-                self.cycle_solder_pin(point)
+                positions.add(point)
+
+        while positions:
+            current = self.pos
+            point = sorted(positions, key=current.distance)[0]
+            positions.remove(point)
+            self.protocol.ptpBase.queued.setPtpCommonParams(5, 5)
+            self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ)
+            self.cycle_solder_pin(point)
         pass
 
 
@@ -75,8 +82,7 @@ class SolderEcolow(M1):
         # positions contient toutes les positions en attente;
         while positions:
             current = self.pos
-            tried_positions = sorted(positions,key=current.distance)
-            point = tried_positions[0]
+            point = sorted(positions,key=current.distance)[0]
             positions.remove(point)
             self.protocol.ptpBase.queued.setPtpCommonParams(50, 50)
             self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ)
@@ -106,7 +112,7 @@ class SolderEcolow(M1):
         self._cycle_solder_distribute() # Mettre de la soudure sur le fer
         time.sleep(3)       # laisser la soudure
         point.z = self.heigth_pcb+self.HEIGHT_PIN_SECURITY
-        self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ)
+        self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ))
 
     def cycle_clean_solder(self):
         # faire un cycle de nettoyage
