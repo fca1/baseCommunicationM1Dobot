@@ -16,6 +16,13 @@ class M1:
         self.initialAngleDefector = 0
         self.is_ok()
         reason = self.protocol.alarm
+        if reason==68:
+            # Z trop haut, un seul moyen couper le moteur
+            self.protocol.hhtBase.queued.setHttTrigOutputEnabled(True)
+            time.sleep(0.2)
+            self.protocol.hhtBase.queued.setHttTrigOutputEnabled(False)
+            reason = self.protocol.alarm
+
         if reason:
             print(f"Erreur sur le M1: error ={reason}")
             self.protocol.alarmBase.clearAllAlarmsState()
@@ -53,7 +60,7 @@ class M1:
 
     def home(self):
         # Mettre alimentation sur le robot
-        self.protocol.ptpBase.queued.setPtpCommonParams(50, 50)
+        self.protocol.ptpBase.queued.setPtpCommonParams(20, 20)
         self.protocol.hhtBase.queued.setHttTrigOutputEnabled(False)
         # monter la tete sans rien faire d'autre
         offset0 = self.protocol.angle

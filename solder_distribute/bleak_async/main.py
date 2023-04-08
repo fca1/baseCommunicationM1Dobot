@@ -3,7 +3,7 @@ import logging
 
 from bleak import BleakError, BleakScanner
 
-from solder_distribute.bleclientsolder import BleClientSolder
+from solder_distribute.bleak_async.bleclientsolder import BleClientSolder
 
 logger = logging.getLogger(__name__)
 logger.level = logging.DEBUG   # FCA007
