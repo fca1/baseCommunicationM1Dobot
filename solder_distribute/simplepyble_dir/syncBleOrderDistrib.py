@@ -14,9 +14,11 @@ class BleOrderDistrib:
         self.peripheral = None
         self.adapter.set_callback_on_disconnected(lambda peripheral: self.peripheral.connect())
         self.event = threading.Event()
+        self.ok = False
 
 
     def _notified(self, data):
+        self.ok = b"ok" in data
         self.event.set()
         pass
     def scan_and_connect(self):
@@ -27,7 +29,7 @@ class BleOrderDistrib:
             self.peripheral.connect()
             self.peripheral.notify(self.service_uuid, self.characteristic_uuid, lambda data: self._notified(data))
 
-    def distribute(self,*datas,timeout_ms:int=None):
+    def distribute(self,*datas,timeout_ms:int=None) -> bool:
         """
         valeurs par binome, comprenant la vitesse de -100% a 100% et le temps. Par exemple, 100,200,-100,50 va apporter de la soudure pendant 200ms et la retracter pendant 50ms
         :param datas:
@@ -35,9 +37,11 @@ class BleOrderDistrib:
         """
 
         content = ",".join([str(x) for x in datas])
+        self.ok = True
         if timeout_ms:
             self.event.clear()
         self.peripheral.write_request(self.service_uuid, self.characteristic_uuid, str.encode(content))
         if timeout_ms:
-            self.event.wait(timeout=timeout_ms/1000)
-        pass
+            if not self.event.wait(timeout=timeout_ms/1000):
+                return False
+        return self.ok
