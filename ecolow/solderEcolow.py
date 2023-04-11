@@ -1,8 +1,11 @@
+import logging
+import sys
 import time
 
 from M1.M1_protocol.ProtocolFunctionArmOrientationBase import E_ptpMode
 from M1.misc.PositionArm import PositionArm
 from m1 import M1
+from solder_distribute.simplepyble_dir.syncBleOrderDistrib import BleOrderDistrib
 
 
 class SolderEcolow(M1):
@@ -19,10 +22,11 @@ class SolderEcolow(M1):
     DIST_BETWEEN_PINS_X=-4.56
     DIST_BETWEEN_PINS_Y =9.12
     HEIGHT_PIN_SECURITY=5   # hauteur relative par rapport au PCB
+    
+    OUTPUT_CMD_DISTRIBUTE=18 # Commande pour demander soudure au distributeur (mode pas ble)
+    INPUT_CMD_DISTRIBUTE=20  # Attente triggger suite ordre par BLE ou commande relay
 
-    OUTPUT_CMD_DISTRIBUTE=18 # Commande pour demander soudure au distributeur
-    INPUT_CMD_DISTRIBUTE=20
-
+    # Une grille est au dessus du PCB avec une epaisseur de 10mm, cette variable permet de passer cette grille
     HEIGHT_SHAPE = 20
 
     # En passant par la fonction JUMP, il est possible de pouvoir choisir 2 planchers.
@@ -30,43 +34,64 @@ class SolderEcolow(M1):
     DEFECTOR_LENGTH = 45
 
 
-
+    
     def __init__(self,ip_addr="192.168.0.55",home=False):
+        # Communication avec le dobot M1
         super().__init__(ip_addr=ip_addr)
-        self.heigth_pcb = self.ALTITUDE_PCB       # doit etre choisi.
+        self.distrib = BleOrderDistrib()
+
+
+        # Le pot de nettoyage du fer a souder 
         self.clean_solder = PositionArm(100,0,70)   #
 
 
-        self.initialize_origin()
+        self.initialize()
         self._init_io()
         if home:
             self.home()
-        self.initialize_arm()
-        self.initialize_length_defector(self.DEFECTOR_LENGTH)
+        # Gestion des hauteurs de securité
         self._configure_jumpJ()
         pass
 
+    def initialize(self):
+        try:
+            self.initialize_origin()
+            self._init_io()
+            self.initialize_arm()
+            self.initialize_length_defector(self.DEFECTOR_LENGTH)
+            self.distrib.scan_and_connect()
+        except Exception as e:
+            logging.error(e)
+            sys.exit(1)
+
+
+
+
+
     def _init_io(self):
         # stopper distri
+
         self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
 
     def _configure_jumpJ(self):
         # 2 plafonds sont prévus et mesurés. (la hauteur de securite et celle de déplacement)
         # Par rapport à la hauteur du PCB, monter l'outil de la sécurité avant d'avoir le droit de bouger en x,y
         # Le plafond étant à la meme hauteur max, pas de variation en Z pendant le déplacement.
-        self.protocol.ptpBase.setPtpJumpParams(self.HEIGHT_PIN_SECURITY,self.heigth_pcb+self.HEIGHT_SHAPE)
+        self.protocol.ptpBase.setPtpJumpParams(self.HEIGHT_PIN_SECURITY,self.ALTITUDE_PCB+self.HEIGHT_SHAPE)
         pass
 
 
 
 
     def cycle_solder_pins(self,initial_point:PositionArm):
+
         positions = set()
         for x in range(self.MATRIX_INSIDE_CONNECTOR[0]):
             for y in range(self.MATRIX_INSIDE_CONNECTOR[1]):
                 point = initial_point.copy()
                 point.x+=x*self.DIST_BETWEEN_PINS_X
                 point.y += y * self.DIST_BETWEEN_PINS_Y
+                point.z = self.ALTITUDE_PCB+self.HEIGHT_PIN_SECURITY
                 positions.add(point)
 
         while positions:
@@ -95,6 +120,7 @@ class SolderEcolow(M1):
                 point = origin_connector.copy()
                 point.x+=x*self.DIST_BETWEEN_CNX_X
                 point.y += y * self.DIST_BETWEEN_CNX_Y
+                point.z = self.ALTITUDE_PCB+self.HEIGHT_PIN_SECURITY
                 positions.add(point)
         # positions contient toutes les positions en attente;
         while positions:
@@ -102,40 +128,49 @@ class SolderEcolow(M1):
             point = sorted(positions,key=current.distance)[0]
             positions.remove(point)
             self.protocol.ptpBase.queued.setPtpCommonParams(20, 20)
+            # En mode jump, l'altitude de déplacement est SHAPE
             self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ))
             self.cycle_solder_pins(point)
         pass
 
 
-    def _cycle_solder_distribute(self,is_short:int=0):
-        self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,1)
-        self.protocol.waitBase.queued.setWaitms(300 if is_short else is_short)
-        self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
+    def _cycle_solder_distribute(self,is_short:int=0) -> None:
+        # La distribution se fait via ble
+        # self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,1)
+        # self.protocol.waitBase.queued.setWaitms(300 if is_short else is_short)
+        # self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
+        time.sleep(2)
+        self.distrib.distribute(300 if is_short else 800,200,-100,50,timeout_ms=500)
+        time.sleep(2)
 
 
-    def cycle_solder_pin(self,initial_point:PositionArm):
+
+
+
+
+    def cycle_solder_pin(self,initial_point:PositionArm) -> None:
         """
         Le pointe a souder est en hauteur à 1mm en Y
         :return:
         """
         self.protocol.ptpBase.queued.setPtpCommonParams(1, 5)
         point = initial_point.copy()
-        point.z = self.heigth_pcb
+        point.z = self.ALTITUDE_PCB
         #self._cycle_solder_distribute() # Mettre de la soudure sur le fer
         #time.sleep(2)
         # Mettre en position soudage
-        self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ))
-        time.sleep(3)   # chauffer
-        self._cycle_solder_distribute() # Mettre de la soudure sur le fer
-        time.sleep(3)       # laisser la soudure
-        point.z = self.heigth_pcb+self.HEIGHT_PIN_SECURITY
-        self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ))
+        try:
+            self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ))
+            self._cycle_solder_distribute() # Mettre de la soudure sur le fer
+        finally:
+            point.z = self.ALTITUDE_PCB+self.HEIGHT_PIN_SECURITY
+            self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ))
         pass
 
-    def cycle_clean_solder(self):
+    def cycle_clean_solder(self) -> None:
         # faire un cycle de nettoyage
         point = self.clean_solder.copy()
-        point.r=-180
+        point.r=self.pos.r
         low_ = PositionArm(0,0,-20,0)
         high_ = PositionArm(0,0,-low_.z,0)
         self._cycle_solder_distribute()
@@ -158,7 +193,7 @@ class SolderEcolow(M1):
 if __name__ == '__main__':
     solder = SolderEcolow(home=True)
     #solder.cycle_clean_solder()
-    origin_connector = PositionArm(316.8, -315.2, solder.heigth_pcb+solder.HEIGHT_PIN_SECURITY)  # @TODO initialiser avec valeur
+    origin_connector = PositionArm(316.8, -315.2, solder.ALTITUDE_PCB)  # @TODO initialiser avec valeur
     solder.cycle_clean_solder()
     solder.cycle_solder_board(origin_connector,0,0)
     pass
