@@ -9,7 +9,7 @@ from solder_distribute.simplepyble_dir.syncBleOrderDistrib import BleOrderDistri
 
 
 class SolderEcolow(M1):
-    ALTITUDE_PCB=57
+    ALTITUDE_PCB=49
     # en mm
     # Les signes negatifs sont pour le deplacement (selon x+ et y+)
     # Dans le cas présent, la longueur la plus grande du PCB est Y.
@@ -46,7 +46,7 @@ class SolderEcolow(M1):
 
 
         self.initialize()
-        self._init_io()
+
         if home:
             self.home()
         # Gestion des hauteurs de securité
@@ -57,9 +57,9 @@ class SolderEcolow(M1):
         try:
             self.initialize_origin()
             self._init_io()
-            self.initialize_arm()
+            self.initialize_arm()           # Choix gauche ou droit
             self.initialize_length_defector(self.DEFECTOR_LENGTH)
-            self.distrib.scan_and_connect()
+            self.distrib.scan_and_connect() # La connextion BLE est faite une fois pour toute.
         except Exception as e:
             logging.error(e)
             sys.exit(1)
@@ -71,7 +71,8 @@ class SolderEcolow(M1):
     def _init_io(self):
         # stopper distri
 
-        self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
+        self.protocol.eioBase.setDo(self.OUTPUT_CMD_DISTRIBUTE,0)
+        pass
 
     def _configure_jumpJ(self):
         # 2 plafonds sont prévus et mesurés. (la hauteur de securite et celle de déplacement)
@@ -105,7 +106,7 @@ class SolderEcolow(M1):
         pass
 
 
-    def cycle_solder_board(self,origin_connector:PositionArm,x0:int=None,y0:int=None):
+    def cycle_solder_board(self,origin_connector:PositionArm,x0:int=None,y0:int=None,disable=False)  :
         positions = set()
         assert x0 is None or 0<=x0<self.MATRIX_CONNECTORS[0]
         assert y0 is None or 0 <= y0 < self.MATRIX_CONNECTORS[1]
@@ -123,6 +124,8 @@ class SolderEcolow(M1):
                 point.z = self.ALTITUDE_PCB+self.HEIGHT_PIN_SECURITY
                 positions.add(point)
         # positions contient toutes les positions en attente;
+        if disable: # pour debug ou connaitre les points
+            return positions
         while positions:
             current = self.pos
             point = sorted(positions,key=current.distance)[0]
@@ -140,7 +143,8 @@ class SolderEcolow(M1):
         # self.protocol.waitBase.queued.setWaitms(300 if is_short else is_short)
         # self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
         time.sleep(2)
-        self.distrib.distribute(300 if is_short else 800,200,-100,50,timeout_ms=500)
+        if not self.distrib.distribute(100,1500,-100,200,timeout_ms=1500):
+            logging.error("Probleme de distribution de soudure")
         time.sleep(2)
 
 
@@ -189,11 +193,21 @@ class SolderEcolow(M1):
     def start_cycle(self):
         pass
 
+def place_cnx_00():
+    solder = SolderEcolow(home=True)
+    origin_connector = PositionArm(316.8, -315.2, solder.ALTITUDE_PCB)  # @TODO initialiser avec valeur
+    # Verifier la position
+    positionCnx00 = solder.cycle_solder_board(origin_connector, 0, 0,disable=True).pop()
+    solder.wait_end_queue(solder.protocol.armOrientationBase.queued.setPTPCmd(positionCnx00, E_ptpMode.JUMP_XYZ))
+    positionCnx00.z = solder.ALTITUDE_PCB
+    solder.wait_end_queue(solder.protocol.armOrientationBase.queued.setPTPCmd(positionCnx00, E_ptpMode.JUMP_XYZ))
+    pass
 
 if __name__ == '__main__':
+    # place_cnx_00()
     solder = SolderEcolow(home=True)
-    #solder.cycle_clean_solder()
+
     origin_connector = PositionArm(316.8, -315.2, solder.ALTITUDE_PCB)  # @TODO initialiser avec valeur
-    solder.cycle_clean_solder()
+    #solder.cycle_clean_solder()
     solder.cycle_solder_board(origin_connector,0,0)
     pass
