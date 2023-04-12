@@ -12,7 +12,6 @@ class BleOrderDistrib:
     def __init__(self):
         self.adapter = simplepyble.Adapter.get_adapters()[0]
         self.peripheral = None
-        self.adapter.set_callback_on_disconnected(lambda peripheral: self.peripheral.connect())
         self.event = threading.Event()
         self.ok = False
 
@@ -26,6 +25,7 @@ class BleOrderDistrib:
         peripherals =filter(lambda peripheral:peripheral.identifier()=="episolder", self.adapter.scan_get_results())
         if peripherals:
             self.peripheral =next(peripherals)
+            self.peripheral.set_callback_on_disconnected(lambda peripheral: self.peripheral.connect())
             self.peripheral.connect()
             self.peripheral.notify(self.service_uuid, self.characteristic_uuid, lambda data: self._notified(data))
 
@@ -37,6 +37,8 @@ class BleOrderDistrib:
         """
 
         content = ",".join([str(x) for x in datas])
+        assert (len(datas)//2)*2 == len(datas)
+
         self.ok = True
         if timeout_ms:
             self.event.clear()
@@ -45,3 +47,9 @@ class BleOrderDistrib:
             if not self.event.wait(timeout=timeout_ms/1000):
                 return False
         return self.ok
+
+if __name__ == '__main__':
+    distrib = BleOrderDistrib()
+    distrib.scan_and_connect()
+    distrib.distribute(100,1000,timeout_ms=2000)
+    pass
