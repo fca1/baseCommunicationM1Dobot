@@ -11,24 +11,29 @@ class PositionArm:
     r: float = 0
 
     def __add__(self, other):
-        self.x += other.x
-        self.y += other.y
-        self.z += other.z
-        self.r += other.r
-        return self
+        s = self.copy()
+        s.x += other.x
+        s.y += other.y
+        s.z += other.z
+        s.r += other.r
+        return s
 
     def __sub__(self, other):
-        self.x -= other.x
-        self.y -= other.y
-        self.z -= other.z
-        self.r -= other.r
-        return self
+        s = self.copy()
+        s.x -= other.x
+        s.y -= other.y
+        s.z -= other.z
+        s.r -= other.r
+        return s
 
-    def load(self,file):
-        return pickle.dump(self,file=file)
+    @staticmethod
+    def load(file):
+        with open(file,mode="rb") as f:
+            return pickle.load(f)
 
     def save(self,file):
-        return pickle.load(file)
+        with open(file,mode="wb") as f:
+            return pickle.dump(self,file=f)
 
     def copy(self):
         return PositionArm(self.x,self.y,self.z,self.r)

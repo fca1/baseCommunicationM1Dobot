@@ -25,15 +25,16 @@ class BleOrderDistrib:
         self.ok = b"ok" in data
         self.event.set()
         pass
-    def scan_and_connect(self):
+    def scan_and_connect(self) -> bool:
         self.adapter.scan_for(5000)
-        peripherals =filter(lambda peripheral:peripheral.identifier()=="episolder", self.adapter.scan_get_results())
+        peripherals =list(filter(lambda peripheral:peripheral.identifier()=="episolder", self.adapter.scan_get_results()))
         if peripherals:
-            self.peripheral =next(peripherals)
+            self.peripheral =peripherals.pop()
             self.peripheral.set_callback_on_disconnected(lambda peripheral: self.peripheral.connect())
             self.peripheral.connect()
             self.peripheral.notify(self.service_uuid, self.characteristic_uuid, lambda data: self._notified(data))
-
+            return True
+        return False
     def distribute(self,*datas,timeout_ms:int=None) -> bool:
         """
         valeurs par binome, comprenant la vitesse de -100% a 100% et le temps. Par exemple, 100,200,-100,50 va apporter de la soudure pendant 200ms et la retracter pendant 50ms

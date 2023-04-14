@@ -74,7 +74,7 @@ class JogM1:
 
 if __name__ == '__main__':
     solder = M1()
-    solder.home()
+    solder.setHome()
     solder.initialize_arm()
 
     # solder.protocol.jogBase.queued.setJOGCommonParams(10, 20)

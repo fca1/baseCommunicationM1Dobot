@@ -15,16 +15,19 @@ class M1:
         self.protocol.setTimeout(5)
         self.initialAngleDefector = 0
         self.is_ok()
+        self.protocol.hhtBase.queued.setHttTrigOutputEnabled(False)
         reason = self.protocol.alarm
         if reason==68:
             # Z trop haut, un seul moyen couper le moteur
             self.protocol.hhtBase.queued.setHttTrigOutputEnabled(True)
-            time.sleep(0.2)
+            time.sleep(2)
             self.protocol.hhtBase.queued.setHttTrigOutputEnabled(False)
             reason = self.protocol.alarm
+        if reason==69:
+            self.protocol.armOrientationBase.setPTPCmd(AngleArm(0,0,30,0), E_ptpMode.MOVJ_INC)
 
-        if reason:
-            print(f"Erreur sur le M1: error ={reason}")
+        while reason:=self.protocol.alarm:
+            logging.warning(f"Erreur sur le M1: error ={reason}")
             self.protocol.alarmBase.clearAllAlarmsState()
         # Nettoyer la queue de messages
         self.protocol.queueCmdBase.setQueuedCmdForceStopExec()
@@ -58,7 +61,7 @@ class M1:
         p1 = PositionArm(0, 0, -self.MAX_HEIGHT) + homing_position
         self.protocol.miscBase.setUserFrame(p1, p0)  # user tool
 
-    def home(self):
+    def setHome(self):
         # Mettre alimentation sur le robot
         self.protocol.ptpBase.queued.setPtpCommonParams(20, 20)
         self.protocol.hhtBase.queued.setHttTrigOutputEnabled(False)
@@ -87,7 +90,7 @@ class M1:
 if __name__ == '__main__':
     m1 = M1()
     m1.initialize_origin()
-    m1.home()
+    m1.setHome()
     m1.initialize_arm()
     # Mettre la hauteur frontiere a 200 et 220
     m1.protocol.ptpBase.queued.setPtpJumpParams(20,150)
