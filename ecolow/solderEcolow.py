@@ -47,7 +47,9 @@ class SolderEcolow(M1):
     # Plancher interdisant de varier (X,Y)
     DEFECTOR_LENGTH = 45
     #  Lors de la descente sur la pin, fait varier selon une pente (HEIGHT_PIN_SECURITY/DIAGONAL)
-    DIAGONAL=1
+    DIAGONAL=2
+    # Le needle est sur le centre pin connecteur, cet offset permet le decalage
+    OFFSET_POINT=PositionArm(0,0.3)
     
     def __init__(self,ip_addr="192.168.0.55",home=False):
         # Communication avec le dobot M1
@@ -136,7 +138,7 @@ class SolderEcolow(M1):
                 if y0 is not None and y!= y0:
                     continue
                 # positionner la tete
-                point = self._origin_connector(x0, y0)
+                point = self._origin_connector(x, y)
                 point.z = self.ALTITUDE_PCB+self.HEIGHT_PIN_SECURITY
                 positions.add(point)
         # positions contient toutes les positions en attente;
@@ -153,15 +155,19 @@ class SolderEcolow(M1):
         pass
 
 
-    def _cycle_solder_distribute(self,is_short:int=0) -> None:
+    def _cycle_solder_distribute(self, wett:bool=False) -> None:
         # La distribution se fait via ble
         # self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,1)
         # self.protocol.waitBase.queued.setWaitms(300 if is_short else is_short)
         # self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
-        time.sleep(2)
-        if not self.distrib.distribute(50,3000,timeout_ms=0):
-            logging.error("Probleme de distribution de soudure")
-        time.sleep(4)
+        if not wett:
+            time.sleep(2)
+            if not self.distrib.distribute(60,2500,timeout_ms=0):
+                logging.error("Probleme de distribution de soudure")
+            time.sleep(3)
+        else:
+            if not self.distrib.distribute(30,1250,timeout_ms=0):
+                logging.error("Probleme de distribution de soudure")
 
 
 
@@ -180,7 +186,6 @@ class SolderEcolow(M1):
         # Retirer  x  1mm (pour amener la panne en diagonale)
         point.x-=self.DIAGONAL
         point.z = self.ALTITUDE_PCB
-        #self._cycle_solder_distribute() # Mettre de la soudure sur le fer
         #time.sleep(2)
         # Mettre en position soudage
         try:
@@ -248,7 +253,7 @@ class SolderEcolow(M1):
         return org_p
 
     def _origin_connector(self, connector_x:int, connector_y:int) ->PositionArm:
-        return self.org_p[f"{x}{y}"]
+        return self.org_p[f"{connector_x}{connector_y}"]+self.OFFSET_POINT
 
 def show_home_solder():
     # Verifier la position
@@ -261,11 +266,13 @@ def show_home_solder():
 
 if __name__ == '__main__':
     solder = SolderEcolow(home=True)
-    show_home_solder()
+    #show_home_solder()
+    # Pointe approximativement vers pcb connecterur
     origin_connector = PositionArm(299.62, -314.38, solder.ALTITUDE_PCB)  # @TODO initialiser avec valeur
     solder.manage_position_pcbs(origin_connector)
     #solder.cycle_clean_solder()
-    solder.cycle_solder_board(1,0)
+    solder.cycle_solder_board(0,2)
+    solder.setHome()
     solder.cycle_solder_board(1,1)
     solder.cycle_solder_board(1,2)
     solder.cycle_solder_board(1,3)

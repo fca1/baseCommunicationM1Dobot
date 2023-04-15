@@ -63,7 +63,7 @@ class BleOrderDistrib:
         content = ",".join([str(x) for x in trs])
 
         self.ok = True
-        if timeout_ms:
+        if timeout_ms is not None:
             self.event.clear()
         self.peripheral.write_request(self.service_uuid, self.characteristic_uuid, str.encode(content))
         if timeout_ms is not None:
