@@ -29,12 +29,12 @@ class SolderEcolow(M1):
     DIM_PANELY=240
     #
     MATRIX_PCBS_PANEL=(2, 5)
-    DIST_BETWEEN_PCB_X =-72
-    DIST_BETWEEN_PCB_Y=45.65
+    DIST_BETWEEN_PCB_X =72
+    DIST_BETWEEN_PCB_Y=-45.65
     # description du connexteur
     MATRIX_INSIDE_CONNECTOR=(3,2)
-    DIST_BETWEEN_PINS_X=-4.56
-    DIST_BETWEEN_PINS_Y =9.12
+    DIST_BETWEEN_PINS_X=4.56
+    DIST_BETWEEN_PINS_Y =-9.12
     HEIGHT_PIN_SECURITY=5   # hauteur relative par rapport au PCB
     
     OUTPUT_CMD_DISTRIBUTE=18 # Commande pour demander soudure au distributeur (mode pas ble)
