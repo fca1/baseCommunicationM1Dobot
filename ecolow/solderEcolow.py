@@ -2,8 +2,11 @@ import logging
 import sys
 import time
 
+import winsound
+
 from M1.M1_protocol.ProtocolFunctionArmOrientationBase import E_ptpMode
 from M1.misc.PositionArm import PositionArm
+from jog3dconnexion import JogM1
 from m1 import M1
 from solder_distribute.simplepyble_dir.syncBleOrderDistrib import BleOrderDistrib
 
@@ -19,7 +22,7 @@ class SolderEcolow(M1):
     # Les fichiers de sauvegarde de position connecteur sont dans ce repertoire
     PATH_RESOURCE=r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\ecolow\resource"
     # pointe une fois pour toute
-    ALTITUDE_PCB=54
+    ALTITUDE_PCB=56.2
     # en mm
     # Les signes negatifs sont pour le deplacement (selon x+ et y+)
     # Dans le cas présent, la longueur la plus grande du PCB est Y.
@@ -47,10 +50,10 @@ class SolderEcolow(M1):
     # Plancher interdisant de varier (X,Y)
     DEFECTOR_LENGTH = 45
     #  Lors de la descente sur la pin, fait varier selon une pente (HEIGHT_PIN_SECURITY/DIAGONAL)
-    DIAGONAL=2
+    DIAGONAL=-2
     # Le needle est sur le centre pin connecteur, cet offset permet le decalage
-    OFFSET_POINT=PositionArm(0,0.3)
-    
+    OFFSET_POINT=PositionArm(+1.5,0)
+
     def __init__(self,ip_addr="192.168.0.55",home=False):
         # Communication avec le dobot M1
         super().__init__(ip_addr=ip_addr)
@@ -162,7 +165,7 @@ class SolderEcolow(M1):
         # self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
         if not wett:
             time.sleep(2)
-            if not self.distrib.distribute(60,2500,timeout_ms=0):
+            if not self.distrib.distribute(30,1800,timeout_ms=0):
                 logging.error("Probleme de distribution de soudure")
             time.sleep(3)
         else:
@@ -227,6 +230,8 @@ class SolderEcolow(M1):
 
         self.protocol.hhtBase.queued.setHttTrigOutputEnabled(False)
         self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ))
+        winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+        time.sleep(3)
         self.protocol.hhtBase.setHttTrigOutputEnabled(True)
         input(f"positionner le needle ({connector_x}{connector_y})")
         pos = self.pos
@@ -236,20 +241,23 @@ class SolderEcolow(M1):
 
     def manage_position_pcbs(self,origin_connector: PositionArm):
         # positionnement en Premiere et derniere position
-        try:
-            self.org_p = self._load_positions()
-        except:
-            for x in range(self.MATRIX_PCBS_PANEL[0]):
-                for y in range(self.MATRIX_PCBS_PANEL[1]):
+
+        self.org_p = self._load_positions()
+        for x in range(self.MATRIX_PCBS_PANEL[0]):
+            for y in range(self.MATRIX_PCBS_PANEL[1]):
+                if not self.org_p.get(f"{x}{y}") is None:
                     self.org_p[f"{x}{y}"] = self._save_position(origin_connector, x, y)
-            self.org_p = self._load_positions()
+        self.org_p = self._load_positions()
         pass
 
     def _load_positions(self) ->dict:
         org_p=dict()
         for x in range(self.MATRIX_PCBS_PANEL[0]):
             for y in range(self.MATRIX_PCBS_PANEL[1]):
-                org_p[f"{x}{y}"]=PositionArm.load(f"{self.PATH_RESOURCE}/pos{x}{y}.pt")
+                try:
+                    org_p[f"{x}{y}"]=PositionArm.load(f"{self.PATH_RESOURCE}/pos{x}{y}.pt")
+                except Exception as e:
+                    logging.debug(f"File not found : {self.PATH_RESOURCE}/pos{x}{y}.pt")
         return org_p
 
     def _origin_connector(self, connector_x:int, connector_y:int) ->PositionArm:
@@ -268,13 +276,24 @@ if __name__ == '__main__':
     solder = SolderEcolow(home=True)
     #show_home_solder()
     # Pointe approximativement vers pcb connecterur
-    origin_connector = PositionArm(299.62, -314.38, solder.ALTITUDE_PCB)  # @TODO initialiser avec valeur
+    origin_connector = PositionArm(128.62, -118.38, solder.ALTITUDE_PCB,-90)  # @TODO initialiser avec valeur
+
     solder.manage_position_pcbs(origin_connector)
-    #solder.cycle_clean_solder()
-    solder.cycle_solder_board(0,2)
-    solder.setHome()
-    solder.cycle_solder_board(1,1)
+    while True:
+        # Attente touche left
+        with JogM1(solder) as jog:
+            while True:
+                winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+                time.sleep(1)
+                bleft, bright = jog.read()
+                if bleft:
+                    break
+        solder.cycle_clean_solder()
+        solder._cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
+        solder.cycle_solder_board()
+        solder.setHome()
     solder.cycle_solder_board(1,2)
-    solder.cycle_solder_board(1,3)
+    solder.cycle_solder_board(1,1)
+    solder.cycle_solder_board(1,0)
     solder.cycle_solder_board(1,4)
     pass
