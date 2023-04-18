@@ -245,7 +245,7 @@ class SolderEcolow(M1):
         self.org_p = self._load_positions()
         for x in range(self.MATRIX_PCBS_PANEL[0]):
             for y in range(self.MATRIX_PCBS_PANEL[1]):
-                if not self.org_p.get(f"{x}{y}") is None:
+                if  self.org_p.get(f"{x}{y}") is None:
                     self.org_p[f"{x}{y}"] = self._save_position(origin_connector, x, y)
         self.org_p = self._load_positions()
         pass
@@ -271,14 +271,23 @@ def show_home_solder():
     solder.wait_end_queue(solder.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ))
     solder.setHome()
 
+def patch_position_connector(solder:SolderEcolow):
+    connector_x=1
+    connector_y=4
+    org_p = solder._load_positions()
+    pt = org_p[f"{connector_x}{connector_y}"]
+    pt += PositionArm(-1,0,0,0)
+    pt.save(f"{solder.PATH_RESOURCE}/pos{connector_x}{connector_y}.pt")
 
 if __name__ == '__main__':
     solder = SolderEcolow(home=True)
+    #patch_position_connector(solder)
     #show_home_solder()
     # Pointe approximativement vers pcb connecterur
     origin_connector = PositionArm(128.62, -118.38, solder.ALTITUDE_PCB,-90)  # @TODO initialiser avec valeur
 
     solder.manage_position_pcbs(origin_connector)
+
     while True:
         # Attente touche left
         with JogM1(solder) as jog:
