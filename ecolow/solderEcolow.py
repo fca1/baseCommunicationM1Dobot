@@ -165,9 +165,9 @@ class SolderEcolow(M1):
         # self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
         if not wett:
             time.sleep(2)
-            if not self.distrib.distribute(30,1800,timeout_ms=0):
+            if not self.distrib.distribute(30,2100,timeout_ms=0):
                 logging.error("Probleme de distribution de soudure")
-            time.sleep(3)
+            time.sleep(2)
         else:
             if not self.distrib.distribute(30,1250,timeout_ms=0):
                 logging.error("Probleme de distribution de soudure")
@@ -204,8 +204,8 @@ class SolderEcolow(M1):
         # faire un cycle de nettoyage
         point = self.clean_solder.copy()
         point.r=self.pos.r
-        low_ = PositionArm(0,0,-20,0)
-        high_ = PositionArm(0,0,-low_.z,0)
+        low_ = PositionArm(0,-20,-20,0)
+        high_ = PositionArm(0,20,-low_.z,0)
         self._cycle_solder_distribute()
         self.protocol.ptpBase.queued.setPtpCommonParams(20, 20)
         self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ)
@@ -293,12 +293,12 @@ if __name__ == '__main__':
         with JogM1(solder) as jog:
             while True:
                 winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
-                time.sleep(1)
+                time.sleep(2)
                 bleft, bright = jog.read()
                 if bleft:
                     break
         solder.cycle_clean_solder()
-        solder._cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
+        #solder._cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
         solder.cycle_solder_board()
         solder.setHome()
     solder.cycle_solder_board(1,2)
