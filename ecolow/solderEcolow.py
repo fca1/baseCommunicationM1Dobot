@@ -1,8 +1,14 @@
 import logging
 import sys
 import time
+import os
+path_root = r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\3dconnexion\dll\x64"
+os.environ['PATH'] += path_root
+
+import pyspacemouse
 
 import winsound
+from pyspacemouse import pyspacemouse
 
 from M1.M1_protocol.ProtocolFunctionArmOrientationBase import E_ptpMode
 from M1.misc.PositionArm import PositionArm
@@ -22,7 +28,7 @@ class SolderEcolow(M1):
     # Les fichiers de sauvegarde de position connecteur sont dans ce repertoire
     PATH_RESOURCE=r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\ecolow\resource"
     # pointe une fois pour toute
-    ALTITUDE_PCB=56.2
+    ALTITUDE_PCB=56
     # en mm
     # Les signes negatifs sont pour le deplacement (selon x+ et y+)
     # Dans le cas présent, la longueur la plus grande du PCB est Y.
@@ -52,7 +58,7 @@ class SolderEcolow(M1):
     #  Lors de la descente sur la pin, fait varier selon une pente (HEIGHT_PIN_SECURITY/DIAGONAL)
     DIAGONAL=-2
     # Le needle est sur le centre pin connecteur, cet offset permet le decalage
-    OFFSET_POINT=PositionArm(+1.5,0)
+    OFFSET_POINT=PositionArm(+1.5,-0.5)
 
     def __init__(self,ip_addr="192.168.0.55",home=False):
         # Communication avec le dobot M1
@@ -280,6 +286,9 @@ def patch_position_connector(solder:SolderEcolow):
     pt.save(f"{solder.PATH_RESOURCE}/pos{connector_x}{connector_y}.pt")
 
 if __name__ == '__main__':
+    pyspacemouse.open(dof_callback=None, button_callback=None, button_callback_arr=None)
+
+
     solder = SolderEcolow(home=True)
     #patch_position_connector(solder)
     #show_home_solder()
@@ -287,22 +296,18 @@ if __name__ == '__main__':
     origin_connector = PositionArm(128.62, -118.38, solder.ALTITUDE_PCB,-90)  # @TODO initialiser avec valeur
 
     solder.manage_position_pcbs(origin_connector)
-
+    while pyspacemouse.read().x:
+        pass
     while True:
-        # Attente touche left
-        with JogM1(solder) as jog:
-            while True:
-                winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
-                time.sleep(2)
-                bleft, bright = jog.read()
-                if bleft:
-                    break
+        while True:
+            winsound.Beep(440,300)
+            time.sleep(1)
+            bleft, bright =(status:= pyspacemouse.read()).buttons
+            print(bleft,status)
+            if status.x<-0.5:
+                break
         solder.cycle_clean_solder()
         #solder._cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
         solder.cycle_solder_board()
         solder.setHome()
-    solder.cycle_solder_board(1,2)
-    solder.cycle_solder_board(1,1)
-    solder.cycle_solder_board(1,0)
-    solder.cycle_solder_board(1,4)
     pass
