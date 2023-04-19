@@ -1,8 +1,14 @@
+import logging
 import threading
 import time
 from threading import Lock
 
 import simplepyble
+
+
+_logger = logging.getLogger(__name__)
+_logger.level = logging.DEBUG
+logging.basicConfig(format='%(asctime)s\t:%(message)s')
 
 
 class BleOrderDistrib:
@@ -11,6 +17,7 @@ class BleOrderDistrib:
 
     def __init__(self,bias:int=0):
         self.adapter = simplepyble.Adapter.get_adapters()[0]
+        self._lock = threading.Lock()
         self.peripheral = None
         self.event = threading.Event()
         self.ok = False
@@ -26,15 +33,29 @@ class BleOrderDistrib:
         self.event.set()
         pass
     def scan_and_connect(self) -> bool:
-        self.adapter.scan_for(5000)
-        peripherals =list(filter(lambda peripheral:peripheral.identifier()=="episolder", self.adapter.scan_get_results()))
-        if peripherals:
-            self.peripheral =peripherals.pop()
-            self.peripheral.set_callback_on_disconnected(lambda peripheral: self.peripheral.connect())
-            self.peripheral.connect()
-            self.peripheral.notify(self.service_uuid, self.characteristic_uuid, lambda data: self._notified(data))
+        if self.peripheral:
+            if self.peripheral.is_connected():
+                return True
+            _logger.debug("attempt to rescan")
+            self.peripheral = None
+        with self._lock:
+            while True:
+                self.adapter.scan_for(5000)
+                _logger.debug("attempt to connect")
+                peripherals =tuple(filter(lambda peripheral:peripheral.identifier()=="episolder", self.adapter.scan_get_results()))
+                if peripherals:
+                    break
+            self.peripheral =peripherals[0]
+            try:
+                _logger.info(f"candidate: {self.peripheral.rssi()}dBm")
+                self.peripheral.connect()
+                _logger.debug(f"connected {self.peripheral.rssi()}dBm")
+                self.peripheral.notify(self.service_uuid, self.characteristic_uuid, lambda data: self._notified(data))
+            except RuntimeError as e:
+                _logger.warning("impossible de se connecter BLE")
+                return False
             return True
-        return False
+
     def distribute(self,*datas,timeout_ms:int=None) -> bool:
         """
         valeurs par binome, comprenant la vitesse de -100% a 100% et le temps. Par exemple, 100,200,-100,50 va apporter de la soudure pendant 200ms et la retracter pendant 50ms
@@ -42,6 +63,9 @@ class BleOrderDistrib:
         :return:
         """
         assert (len(datas)//2)*2 == len(datas)
+        if not self.scan_and_connect():
+            _logger.warning(f"Ordre ble non execute: {datas}")
+            return False
         # en cas de changement de sens, introduit la notion d'hysteresis
         cpl = [int(x) for x in datas]
         trs = []
@@ -63,14 +87,20 @@ class BleOrderDistrib:
         content = ",".join([str(x) for x in trs])
 
         self.ok = True
-        if timeout_ms is not None:
-            self.event.clear()
-        self.peripheral.write_request(self.service_uuid, self.characteristic_uuid, str.encode(content))
-        if timeout_ms is not None:
-            # Si timeout_ms=0 c'est une gestion automatique du timeout qui est mise en place
-            if not self.event.wait(timeout=timeout_ms/1000 if timeout_ms else tmo_ms/1000):
+        with self._lock:
+            if timeout_ms is not None:
+                self.event.clear()
+            try:
+                self.peripheral.write_request(self.service_uuid, self.characteristic_uuid, str.encode(content))
+            except RuntimeError as e:
+                _logger.warning(f"Ordre ble non execute: {datas}")
                 return False
-        return self.ok
+            if timeout_ms is not None:
+                # Si timeout_ms=0 c'est une gestion automatique du timeout qui est mise en place
+                if not self.event.wait(timeout=timeout_ms/1000 if timeout_ms else tmo_ms/1000):
+                    return False
+            return self.ok
+
 
 if __name__ == '__main__':
     distrib = BleOrderDistrib(400)
