@@ -164,22 +164,23 @@ class SolderEcolow(M1):
         pass
 
 
-    def _cycle_solder_distribute(self, wett:bool=False) -> None:
+    def cycle_solder_distribute(self, wett:bool=False) -> None:
         # La distribution se fait via ble
         # self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,1)
         # self.protocol.waitBase.queued.setWaitms(300 if is_short else is_short)
         # self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
         if not wett:
             time.sleep(2)
-            if not self.distrib.distribute(30,2100,timeout_ms=0):
+            if not self.distrib.distribute(30,1800,timeout_ms=0):
                 logging.error("Probleme de distribution de soudure")
             time.sleep(2)
         else:
-            if not self.distrib.distribute(30,1250,timeout_ms=0):
+            if not self.distrib.distribute(25,1800,timeout_ms=None):
                 logging.error("Probleme de distribution de soudure")
 
 
-
+    def cycle_solder_wait_distributed(self, timeout_ms=None) -> bool:
+        return self.distrib.wait_end_distribute(timeout_ms)
 
 
 
@@ -195,14 +196,14 @@ class SolderEcolow(M1):
         # Retirer  x  1mm (pour amener la panne en diagonale)
         point.x-=self.DIAGONAL
         point.z = self.ALTITUDE_PCB
-        #time.sleep(2)
-        # Mettre en position soudage
+        self.cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
         try:
             self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ))
-            self._cycle_solder_distribute() # Mettre de la soudure sur le fer
         finally:
             self.protocol.ptpBase.queued.setPtpCommonParams(10, 10)
             point = initial_point.copy()
+            self.cycle_solder_wait_distributed(3000)
+            time.sleep(2)
             self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ))
         pass
 
@@ -210,9 +211,9 @@ class SolderEcolow(M1):
         # faire un cycle de nettoyage
         point = self.clean_solder.copy()
         point.r=self.pos.r
-        low_ = PositionArm(0,-20,-20,0)
-        high_ = PositionArm(0,20,-low_.z,0)
-        self._cycle_solder_distribute()
+        low_ = PositionArm(0,-10,-20,0)
+        high_ = -low_
+        self.cycle_solder_distribute(True)
         self.protocol.ptpBase.queued.setPtpCommonParams(20, 20)
         self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ)
         self.protocol.ptpBase.queued.setPtpCommonParams(10, 10)
@@ -296,17 +297,20 @@ if __name__ == '__main__':
     origin_connector = PositionArm(128.62, -118.38, solder.ALTITUDE_PCB,-90)  # @TODO initialiser avec valeur
 
     solder.manage_position_pcbs(origin_connector)
-    while pyspacemouse.read().x:
-        pass
+
     while True:
         while True:
             winsound.Beep(440,300)
-            time.sleep(1)
+            time.sleep(0.5)
             bleft, bright =(status:= pyspacemouse.read()).buttons
             print(bleft,status)
-            if status.x<-0.5:
+            if bleft:
                 break
-        solder.cycle_clean_solder()
+        while True:
+            bleft, bright =(status:= pyspacemouse.read()).buttons
+            if not bleft:
+                break
+        #solder.cycle_clean_solder()
         #solder._cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
         solder.cycle_solder_board()
         solder.setHome()

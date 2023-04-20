@@ -20,6 +20,7 @@ class BleOrderDistrib:
         self._lock = threading.Lock()
         self.peripheral = None
         self.event = threading.Event()
+        self.event.set()
         self.ok = False
         self.bias = bias
         self._forward = False
@@ -56,6 +57,10 @@ class BleOrderDistrib:
                 return False
             return True
 
+    def wait_end_distribute(self,timeout_ms:int=0) -> bool:
+            # Si timeout_ms=0 c'est une gestion automatique du timeout qui est mise en place
+            return  self.event.wait(timeout=timeout_ms / 1000)
+
     def distribute(self,*datas,timeout_ms:int=None) -> bool:
         """
         valeurs par binome, comprenant la vitesse de -100% a 100% et le temps. Par exemple, 100,200,-100,50 va apporter de la soudure pendant 200ms et la retracter pendant 50ms
@@ -88,8 +93,7 @@ class BleOrderDistrib:
 
         self.ok = True
         with self._lock:
-            if timeout_ms is not None:
-                self.event.clear()
+            self.event.clear()
             try:
                 self.peripheral.write_request(self.service_uuid, self.characteristic_uuid, str.encode(content))
             except RuntimeError as e:

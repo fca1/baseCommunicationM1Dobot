@@ -26,6 +26,14 @@ class PositionArm:
         s.r -= other.r
         return s
 
+    def __neg__(self):
+        s = PositionArm()
+        s.x =- self.x
+        s.y =- self.y
+        s.z =- self.z
+        s.r =- self.r
+        return s
+
     @staticmethod
     def load(file):
         with open(file,mode="rb") as f:
