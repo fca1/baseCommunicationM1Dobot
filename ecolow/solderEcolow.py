@@ -2,13 +2,11 @@ import logging
 import sys
 import time
 import os
-path_root = r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\3dconnexion\dll\x64"
-os.environ['PATH'] += path_root
+#path_root = r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\3dconnexion\dll\x64"
+#os.environ['PATH'] += path_root
 
-import pyspacemouse
 
 import winsound
-from pyspacemouse import pyspacemouse
 
 from M1.M1_protocol.ProtocolFunctionArmOrientationBase import E_ptpMode
 from M1.misc.PositionArm import PositionArm
@@ -28,7 +26,7 @@ class SolderEcolow(M1):
     # Les fichiers de sauvegarde de position connecteur sont dans ce repertoire
     PATH_RESOURCE=r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\ecolow\resource"
     # pointe une fois pour toute
-    ALTITUDE_PCB=56
+    ALTITUDE_PCB=54
     # en mm
     # Les signes negatifs sont pour le deplacement (selon x+ et y+)
     # Dans le cas présent, la longueur la plus grande du PCB est Y.
@@ -44,7 +42,7 @@ class SolderEcolow(M1):
     MATRIX_INSIDE_CONNECTOR=(3,2)
     DIST_BETWEEN_PINS_X=4.56
     DIST_BETWEEN_PINS_Y =-9.12
-    HEIGHT_PIN_SECURITY=5   # hauteur relative par rapport au PCB
+    HEIGHT_PIN_SECURITY=4   # hauteur relative par rapport au PCB
     
     OUTPUT_CMD_DISTRIBUTE=18 # Commande pour demander soudure au distributeur (mode pas ble)
     INPUT_CMD_DISTRIBUTE=20  # Attente triggger suite ordre par BLE ou commande relay
@@ -56,9 +54,9 @@ class SolderEcolow(M1):
     # Plancher interdisant de varier (X,Y)
     DEFECTOR_LENGTH = 45
     #  Lors de la descente sur la pin, fait varier selon une pente (HEIGHT_PIN_SECURITY/DIAGONAL)
-    DIAGONAL=-2
-    # Le needle est sur le centre pin connecteur, cet offset permet le decalage
-    OFFSET_POINT=PositionArm(+1.5,-0.5)
+    DIAGONAL=-3
+    # Le needle est sur le centre pin connecteur, cet offset permet le decalage sur la pin1 de chaque connecteur
+    OFFSET_POINT=PositionArm(1.7,-0.5)
 
     def __init__(self,ip_addr="192.168.0.55",home=False):
         # Communication avec le dobot M1
@@ -171,7 +169,7 @@ class SolderEcolow(M1):
         # self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
         if not wett:
             time.sleep(2)
-            if not self.distrib.distribute(30,1800,timeout_ms=0):
+            if not self.distrib.distribute(35,1800,timeout_ms=0):
                 logging.error("Probleme de distribution de soudure")
             time.sleep(2)
         else:
@@ -202,7 +200,7 @@ class SolderEcolow(M1):
         finally:
             self.protocol.ptpBase.queued.setPtpCommonParams(10, 10)
             point = initial_point.copy()
-            self.cycle_solder_wait_distributed(3000)
+            self.cycle_solder_wait_distributed(3400)
             time.sleep(2)
             self.wait_end_queue(self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ))
         pass
@@ -223,8 +221,14 @@ class SolderEcolow(M1):
         self.setHome()
         pass
 
-
-
+    def buttons_state(self):
+        while True:
+            s = self.protocol.eioBase.do(18,1)
+            print(s)
+            #xx =
+            #s = self.protocol.eioBase.di(18)
+            #print(bin(s[0]),bin(s[1]))
+        return s
 
     def start_cycle(self):
         pass
@@ -274,7 +278,7 @@ def show_home_solder():
     # Verifier la position
     solder.setHome()
     point = solder.pos
-    point.z = 21
+    point.z = 17.5
     solder.wait_end_queue(solder.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ))
     solder.setHome()
 
@@ -287,14 +291,12 @@ def patch_position_connector(solder:SolderEcolow):
     pt.save(f"{solder.PATH_RESOURCE}/pos{connector_x}{connector_y}.pt")
 
 if __name__ == '__main__':
-    pyspacemouse.open(dof_callback=None, button_callback=None, button_callback_arr=None)
-
 
     solder = SolderEcolow(home=True)
     #patch_position_connector(solder)
     #show_home_solder()
     # Pointe approximativement vers pcb connecterur
-    origin_connector = PositionArm(128.62, -118.38, solder.ALTITUDE_PCB,-90)  # @TODO initialiser avec valeur
+    origin_connector = PositionArm(126.62, -118.38, solder.ALTITUDE_PCB,-90)  # @TODO initialiser avec valeur
 
     solder.manage_position_pcbs(origin_connector)
 
@@ -302,14 +304,8 @@ if __name__ == '__main__':
         while True:
             winsound.Beep(440,300)
             time.sleep(0.5)
-            bleft, bright =(status:= pyspacemouse.read()).buttons
-            print(bleft,status)
-            if bleft:
-                break
-        while True:
-            bleft, bright =(status:= pyspacemouse.read()).buttons
-            if not bleft:
-                break
+            input("go")
+            break
         #solder.cycle_clean_solder()
         #solder._cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
         solder.cycle_solder_board()

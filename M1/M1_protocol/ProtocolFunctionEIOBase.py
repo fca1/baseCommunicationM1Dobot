@@ -1,8 +1,11 @@
+import struct
+
 from M1.M1_protocol.M1_msg import M1_msg
 from M1.M1_protocol.M1_protocol import M1_protocol
 
 
 class ProtocolFunctionEIOBase(M1_protocol):
+    # @TODO problem with documentation, impossible to retrieve the status of IO
     def __init__(self):
         super().__init__()
 
@@ -20,3 +23,14 @@ class ProtocolFunctionEIOBase(M1_protocol):
     def _decode_do(self, msg) -> bool:
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
         return bool(payload[1])
+
+    @M1_protocol.cmd
+    def di(self,index:int):
+        payload = struct.pack("<ff", index,0)
+        msg = M1_msg.build_msg(133,False, False,payload)
+        return msg, self._decode_di
+
+
+    def _decode_di(self, msg) -> (int,bool):
+        _id, write, isqueued, payload = M1_msg.decode_msg(msg)
+        return payload
