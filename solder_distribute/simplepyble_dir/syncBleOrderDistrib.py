@@ -55,6 +55,7 @@ class BleOrderDistrib:
             except RuntimeError as e:
                 _logger.warning("impossible de se connecter BLE")
                 return False
+            _logger.debug(f"Ble is ready")
             return True
 
     def wait_end_distribute(self,timeout_ms:int=0) -> bool:

@@ -25,8 +25,8 @@ class SolderEcolow(M1):
     """
     # Les fichiers de sauvegarde de position connecteur sont dans ce repertoire
     PATH_RESOURCE=r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\ecolow\resource"
-    # pointe une fois pour toute
-    ALTITUDE_PCB=54
+    # pointe une fois pour toute sur le PCB
+    ALTITUDE_PCB=53.8
     # en mm
     # Les signes negatifs sont pour le deplacement (selon x+ et y+)
     # Dans le cas présent, la longueur la plus grande du PCB est Y.
@@ -56,7 +56,7 @@ class SolderEcolow(M1):
     #  Lors de la descente sur la pin, fait varier selon une pente (HEIGHT_PIN_SECURITY/DIAGONAL)
     DIAGONAL=-3
     # Le needle est sur le centre pin connecteur, cet offset permet le decalage sur la pin1 de chaque connecteur
-    OFFSET_POINT=PositionArm(1.7,-0.5)
+    OFFSET_POINT=PositionArm(-0.2,-1)
 
     def __init__(self,ip_addr="192.168.0.55",home=False):
         # Communication avec le dobot M1
@@ -173,7 +173,7 @@ class SolderEcolow(M1):
                 logging.error("Probleme de distribution de soudure")
             time.sleep(2)
         else:
-            if not self.distrib.distribute(25,1800,timeout_ms=None):
+            if not self.distrib.distribute(20,2000,timeout_ms=None):
                 logging.error("Probleme de distribution de soudure")
 
 
@@ -278,7 +278,7 @@ def show_home_solder():
     # Verifier la position
     solder.setHome()
     point = solder.pos
-    point.z = 17.5
+    point.z = 14.8
     solder.wait_end_queue(solder.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ))
     solder.setHome()
 
