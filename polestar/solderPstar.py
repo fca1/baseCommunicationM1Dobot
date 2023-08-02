@@ -30,7 +30,7 @@ class SolderPstar(M1):
         r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\polestar\resource"
     )
     # pointe une fois pour toute sur le PCB
-    ALTITUDE_PCB = 22
+    ALTITUDE_PCB = 21.5
     # en mm
     # Les signes negatifs sont pour le deplacement (selon x+ et y+)
     # Dans le cas présent, la longueur la plus grande du PCB est Y.
@@ -43,7 +43,7 @@ class SolderPstar(M1):
     DIST_BETWEEN_PCB_X = 55
     DIST_BETWEEN_PCB_Y = -20
     # description du connexteur
-    HEIGHT_PIN_SECURITY = 2  # hauteur relative par rapport au PCB
+    HEIGHT_PIN_SECURITY = 4  # hauteur relative par rapport au PCB
 
     OUTPUT_CMD_DISTRIBUTE = (
         18  # Commande pour demander soudure au distributeur (mode pas ble)
@@ -107,44 +107,32 @@ class SolderPstar(M1):
         )
         pass
 
-    def cycle_solder_pins(self, initial_point: PositionArm):
-        # point = initial_point.copy()
-        # point.y-=5.2
-        # point.x-=6.9
-        # point.z = self.ALTITUDE_PCB + self.HEIGHT_PIN_SECURITY
-        # positions.add(point)
-        # point = initial_point.copy()
-        # point.y-=14.6
-        # point.x-=7.3
-        # point.z = self.ALTITUDE_PCB + self.HEIGHT_PIN_SECURITY
-        # positions.add(point)
-        # point = initial_point.copy()
-        # point.y-=4
-        # point.x-=49
-        # point.z = self.ALTITUDE_PCB + self.HEIGHT_PIN_SECURITY
-        # positions.add(point)
+    def cyle_compute_solder_pins(self,positions:set,initial_point: PositionArm)->set:
+        point = initial_point.copy()
+        # point.x += x * self.DIST_BETWEEN_PINS_X
+        # point.y += y * self.DIST_BETWEEN_PINS_Y
+        point.z = self.ALTITUDE_PCB + self.HEIGHT_PIN_SECURITY
+        positions.add(point)
+        point1 = point.copy()
+        point1.x -=0.4
+        point1.y -=9.4
+        positions.add(point1)
+        point2 = point.copy()
+        point2.x -=40.1
+        point2.y +=3
+        positions.add(point2)
+        return positions
 
 
-        positions = set()
-        for x in range(self.MATRIX_INSIDE_CONNECTOR[0]):
-            for y in range(self.MATRIX_INSIDE_CONNECTOR[1]):
-                point = initial_point.copy()
-                point.x += x * self.DIST_BETWEEN_PINS_X
-                point.y += y * self.DIST_BETWEEN_PINS_Y
-                point.z = self.ALTITUDE_PCB + self.HEIGHT_PIN_SECURITY
-                positions.add(point)
-
-        while positions:
-            current = self.pos
-            point = sorted(positions, key=current.distance)[0]
-            positions.remove(point)
-            self.protocol.ptpBase.queued.setPtpCommonParams(5, 5)
-            # se décaler de 1mm en x pour venir en diagonale
-            point.x += self.DIAGONAL
-            self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ)
-            self.cycle_solder_pin(point)
-            pass
+    def cycle_solder_pins(self, point: PositionArm):
+        self.protocol.ptpBase.queued.setPtpCommonParams(80, 80)
+        # se décaler de 1mm en x pour venir en diagonale
+        point.x += self.DIAGONAL
+        self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ)
+        self.cycle_solder_pin(point)
         pass
+
+
 
     def cycle_solder_board(self, x0: int = None, y0: int = None, disable=False):
         positions = set()
@@ -164,11 +152,19 @@ class SolderPstar(M1):
         # positions contient toutes les positions en attente;
         if disable:  # pour debug ou connaitre les points
             return positions
-        while positions:
+        # recceuilir toutes les positions
+        positions_pin=set()
+        for position in positions:
+            positions_pin|=self.cyle_compute_solder_pins(positions_pin,position)
+
+
+
+
+        while positions_pin:
             current = self.pos
-            point = sorted(positions, key=current.distance)[0]
-            positions.remove(point)
-            self.protocol.ptpBase.queued.setPtpCommonParams(20, 20)
+            point = sorted(positions_pin, key=current.distance)[0]
+            positions_pin.remove(point)
+            self.protocol.ptpBase.queued.setPtpCommonParams(80, 80)
             # En mode jump, l'altitude de déplacement est SHAPE
             self.wait_end_queue(
                 self.protocol.armOrientationBase.queued.setPTPCmd(
@@ -185,11 +181,11 @@ class SolderPstar(M1):
         # self.wait_end_queue(self.protocol.eioBase.queued.setDo(self.OUTPUT_CMD_DISTRIBUTE,0))
         if not wett:
             time.sleep(2)
-            if not self.distrib.distribute(35, 1800, timeout_ms=0):
+            if not self.distrib.distribute(35, 1000, timeout_ms=0):
                 logging.error("Probleme de distribution de soudure")
             time.sleep(2)
         else:
-            if not self.distrib.distribute(20, 2000, timeout_ms=None):
+            if not self.distrib.distribute(30, 1000, timeout_ms=None):
                 logging.error("Probleme de distribution de soudure")
 
     def cycle_solder_wait_distributed(self, timeout_ms=None) -> bool:
@@ -201,12 +197,13 @@ class SolderPstar(M1):
         :return:
         """
 
-        self.protocol.ptpBase.queued.setPtpCommonParams(1, 5)
+        self.protocol.ptpBase.queued.setPtpCommonParams(80, 80)
         point = initial_point.copy()
         # Retirer  x  1mm (pour amener la panne en diagonale)
         point.x -= self.DIAGONAL
         point.z = self.ALTITUDE_PCB
-        self.cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
+        self.distrib.distribute(45, 250, timeout_ms=None)
+        #self.cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
         try:
             self.wait_end_queue(
                 self.protocol.armOrientationBase.queued.setPTPCmd(
@@ -214,10 +211,10 @@ class SolderPstar(M1):
                 )
             )
         finally:
-            self.protocol.ptpBase.queued.setPtpCommonParams(10, 10)
+            self.protocol.ptpBase.queued.setPtpCommonParams(80, 80)
             point = initial_point.copy()
-            self.cycle_solder_wait_distributed(3400)
-            time.sleep(2)
+            self.distrib.distribute(35, 500, timeout_ms=0)
+            time.sleep(1)
             self.wait_end_queue(
                 self.protocol.armOrientationBase.queued.setPTPCmd(
                     point, E_ptpMode.MOVJ_XYZ
@@ -295,7 +292,7 @@ class SolderPstar(M1):
             for y in range(self.MATRIX_PCBS_PANEL[1]):
                 try:
                     org_p[f"{x}{y}"] = PositionArm.load(
-                        f"{self.PATH_RESOURCE}/pos{x}{y}.pt"
+                        f"{self.PATH_RESOURCE}/pos{x}{y}.pt1"
                     )
                 except Exception as e:
                     logging.debug(f"File not found : {self.PATH_RESOURCE}/pos{x}{y}.pt")
@@ -316,7 +313,7 @@ def show_home_solder():
     solder.setHome()
 
 
-def patch_position_connector(solder: SolderEcolow):
+def patch_position_connector(solder: SolderPstar):
     connector_x = 1
     connector_y = 4
     org_p = solder._load_positions()
@@ -331,7 +328,7 @@ if __name__ == "__main__":
     # show_home_solder()
     # Pointe approximativement vers pcb connecterur
     origin_connector = PositionArm(
-        100.0, +50, solder.ALTITUDE_PCB, -90
+        100.0-6.9, +50-5.7, solder.ALTITUDE_PCB, -90
     )  # @TODO initialiser avec valeur
 
     solder.manage_position_pcbs(origin_connector)

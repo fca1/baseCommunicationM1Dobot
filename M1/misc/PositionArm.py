@@ -1,7 +1,7 @@
 import math
 from dataclasses import dataclass
 import pickle
-
+import json
 
 @dataclass(unsafe_hash=True)
 class PositionArm:
@@ -36,12 +36,19 @@ class PositionArm:
 
     @staticmethod
     def load(file):
-        with open(file, mode="rb") as f:
-            return pickle.load(f)
+        with open(file, mode="r") as f:
+            dct = json.loads(f.readline())
+            return PositionArm(dct["x"],dct["y"], dct["z"], dct["r"])
+
 
     def save(self, file):
-        with open(file, mode="wb") as f:
-            return pickle.dump(self, file=f)
+        dct = { "x":self.x,
+                "y":self.y,
+                "z":self.z,
+                "r":self.r}
+        with open(file, mode="w") as f:
+            x = json.dumps(dct)
+            f.write(x)
 
     def copy(self):
         return PositionArm(self.x, self.y, self.z, self.r)
