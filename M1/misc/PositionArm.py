@@ -28,23 +28,23 @@ class PositionArm:
 
     def __neg__(self):
         s = PositionArm()
-        s.x =- self.x
-        s.y =- self.y
-        s.z =- self.z
-        s.r =- self.r
+        s.x = -self.x
+        s.y = -self.y
+        s.z = -self.z
+        s.r = -self.r
         return s
 
     @staticmethod
     def load(file):
-        with open(file,mode="rb") as f:
+        with open(file, mode="rb") as f:
             return pickle.load(f)
 
-    def save(self,file):
-        with open(file,mode="wb") as f:
-            return pickle.dump(self,file=f)
+    def save(self, file):
+        with open(file, mode="wb") as f:
+            return pickle.dump(self, file=f)
 
     def copy(self):
-        return PositionArm(self.x,self.y,self.z,self.r)
+        return PositionArm(self.x, self.y, self.z, self.r)
 
-    def distance(self,other) -> float :
-        return math.sqrt((self.x-other.x)**2 + (self.y-other.y)**2)
+    def distance(self, other) -> float:
+        return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)

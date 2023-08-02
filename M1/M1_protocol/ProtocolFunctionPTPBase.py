@@ -5,7 +5,6 @@ from M1.M1_protocol.M1_protocol import M1_protocol, Acceleration, Velocity
 
 
 class ProtocolFunctionPTPBase(M1_protocol):
-
     def __init__(self):
         super().__init__()
 
@@ -30,8 +29,17 @@ class ProtocolFunctionPTPBase(M1_protocol):
 
     @M1_protocol.cmd
     def setPtpJointParams(self, velocity: Velocity, acceleration: Acceleration):
-        payload = struct.pack("<ffffffff", velocity.x, velocity.y, velocity.z, velocity.r, acceleration.x,
-                              acceleration.y, acceleration.z, acceleration.r)
+        payload = struct.pack(
+            "<ffffffff",
+            velocity.x,
+            velocity.y,
+            velocity.z,
+            velocity.r,
+            acceleration.x,
+            acceleration.y,
+            acceleration.z,
+            acceleration.r,
+        )
         return M1_msg.build_msg(80, True, self.isQueued, payload)
 
     def _decode_ptpJointParams(self, msg) -> (Velocity, Acceleration):
@@ -40,9 +48,14 @@ class ProtocolFunctionPTPBase(M1_protocol):
         return Velocity(x, y, z, r), Acceleration(*acc)
 
     @M1_protocol.cmd
-    def setPtpCoordinateParams(self, velocity_xyz: float, velocity_r: float, acc_xyz: float, acc_r: float):
+    def setPtpCoordinateParams(
+        self, velocity_xyz: float, velocity_r: float, acc_xyz: float, acc_r: float
+    ):
         payload = struct.pack("<ffff", velocity_xyz, velocity_r, acc_xyz, acc_r)
-        return M1_msg.build_msg(81, True, self.isQueued, payload), self._decode_indexQueue
+        return (
+            M1_msg.build_msg(81, True, self.isQueued, payload),
+            self._decode_indexQueue,
+        )
 
     def _decode_ptpCoordinateParams(self, msg) -> (int, int, int, int):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
@@ -70,7 +83,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
         float jumpHeight; //Lifting height in Jump mode
         float zLimit; //Maximum lifting height in Jump mod
         """
-        return M1_msg.build_msg(82,False,self.isQueued), self._decode_ptpJumpParams
+        return M1_msg.build_msg(82, False, self.isQueued), self._decode_ptpJumpParams
 
     def _decode_ptpJumpParams(self, msg) -> (int, int):
         """
@@ -78,7 +91,7 @@ class ProtocolFunctionPTPBase(M1_protocol):
         float zLimit; //Maximum lifting height in Jump mod
         """
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
-        jumpHeight, zLimit,_ = struct.unpack("<fff", payload)
+        jumpHeight, zLimit, _ = struct.unpack("<fff", payload)
         return jumpHeight, zLimit
 
     @M1_protocol.cmd

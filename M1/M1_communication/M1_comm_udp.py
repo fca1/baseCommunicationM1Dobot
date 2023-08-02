@@ -23,14 +23,17 @@ class M1_comm_udp:
                 raise TimeoutError(f"Timeout msg: {bytesToSend.hex()}")
             pass
 
-
     def cmd(self, msg_or_tuple: bytes) -> ...:
         """
         Le protocole travaille  selon le principe du ping pong
         :param msg_or_tuple:
         :return: la donnée brute du robot si decode est None sinon variable selon decode.
         """
-        x, decode_fcnt = (*msg_or_tuple,) if not isinstance(msg_or_tuple, bytes) else (msg_or_tuple, None)
+        x, decode_fcnt = (
+            (*msg_or_tuple,)
+            if not isinstance(msg_or_tuple, bytes)
+            else (msg_or_tuple, None)
+        )
         answer = self.send_msg(x)
         if decode_fcnt:
             return decode_fcnt(answer)

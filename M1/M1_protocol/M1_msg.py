@@ -15,14 +15,24 @@ class M1_msg:
         return msg
 
     @staticmethod
-    def _build_payload(_id: int, write: bool = False, isQueued: bool = False, params: bytes = bytearray()):
+    def _build_payload(
+        _id: int,
+        write: bool = False,
+        isQueued: bool = False,
+        params: bytes = bytearray(),
+    ):
         assert _id < 256
         ctrl = (1 if write else 0) + (2 if isQueued else 0)
         payload = bytearray((_id, ctrl)) + params
         return payload
 
     @staticmethod
-    def build_msg(_id: int, write: bool = False, isQueued: bool = False, params: bytes = bytearray()) -> (bytearray,bool):
+    def build_msg(
+        _id: int,
+        write: bool = False,
+        isQueued: bool = False,
+        params: bytes = bytearray(),
+    ) -> (bytearray, bool):
         askQueued = bool(isQueued)
         payload = M1_msg._build_payload(_id, write, askQueued, params)
         return M1_msg._build_msg(payload)
@@ -39,6 +49,6 @@ class M1_msg:
         payload = payload_wchk[0:-1]
         if len(payload) != length:
             raise Exception("bad length")
-        if -(sum(payload) + _id + ctrl) & 0xff != chk:
+        if -(sum(payload) + _id + ctrl) & 0xFF != chk:
             raise Exception("bad chk")
         return _id, bool((ctrl & 0x01) >> 0), bool((ctrl & 0x02) >> 1), payload

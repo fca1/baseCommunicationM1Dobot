@@ -21,7 +21,11 @@ class CommProtocolM1(M1_comm_udp, ProtocolFunction):
         :return: la donnée brute du robot si decode est None sinon variable selon decode.
         """
         msg_or_tuple = fcnt
-        x, decode_fcnt = (*msg_or_tuple,) if not isinstance(msg_or_tuple, bytes) else (msg_or_tuple, None)
+        x, decode_fcnt = (
+            (*msg_or_tuple,)
+            if not isinstance(msg_or_tuple, bytes)
+            else (msg_or_tuple, None)
+        )
         answer = self.send_msg(x)
         if decode_fcnt:
             return decode_fcnt(answer)
@@ -44,7 +48,6 @@ class CommProtocolM1(M1_comm_udp, ProtocolFunction):
         x, y, z, r, *angle = self.poseBase.pose()
         return AngleArm(*angle)
 
-
     @property
     def status_ok(self) -> bool:
         return not "error" in self.status
@@ -55,7 +58,6 @@ class CommProtocolM1(M1_comm_udp, ProtocolFunction):
 
     def setClearAllAlarmsState(self):
         self.alarmBase.clearAllAlarmsState()
-
 
     def setTimeout(self, timeout):
         self.client.settimeout(timeout)

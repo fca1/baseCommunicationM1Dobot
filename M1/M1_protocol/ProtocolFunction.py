@@ -1,10 +1,14 @@
 from M1.M1_protocol.ProtocolFunctionALARMBase import ProtocolFunctionALARMBase
 from M1.M1_protocol.ProtocolFunctionARCBase import ProtocolFunctionARCBase
-from M1.M1_protocol.ProtocolFunctionArmOrientationBase import ProtocolFunctionArmOrientationBase
+from M1.M1_protocol.ProtocolFunctionArmOrientationBase import (
+    ProtocolFunctionArmOrientationBase,
+)
 from M1.M1_protocol.ProtocolFunctionCPBase import ProtocolFunctionCPBase
 from M1.M1_protocol.ProtocolFunctionDeviceInfoBase import ProtocolFunctionDeviceInfoBase
 from M1.M1_protocol.ProtocolFunctionEIOBase import ProtocolFunctionEIOBase
-from M1.M1_protocol.ProtocolFunctionEndEffectorBase import ProtocolFunctionEndEffectorBase
+from M1.M1_protocol.ProtocolFunctionEndEffectorBase import (
+    ProtocolFunctionEndEffectorBase,
+)
 from M1.M1_protocol.ProtocolFunctionHHTBase import ProtocolFunctionHHTBase
 from M1.M1_protocol.ProtocolFunctionHOMEBase import ProtocolFunctionHOMEBase
 from M1.M1_protocol.ProtocolFunctionJOGBase import ProtocolFunctionJOGBase

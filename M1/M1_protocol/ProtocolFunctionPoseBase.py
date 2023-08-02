@@ -5,7 +5,6 @@ from M1.M1_protocol.M1_protocol import M1_protocol
 
 
 class ProtocolFunctionPoseBase(M1_protocol):
-
     def __init__(self):
         super().__init__()
 
@@ -16,7 +15,9 @@ class ProtocolFunctionPoseBase(M1_protocol):
 
     def _decode_pose(self, msg: bytearray):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
-        x, y, z, r, angle_base, angle_rear, angle_form, angle_deflector = struct.unpack("<ffffffff", payload)
+        x, y, z, r, angle_base, angle_rear, angle_form, angle_deflector = struct.unpack(
+            "<ffffffff", payload
+        )
         return x, y, z, r, angle_base, angle_rear, angle_form, angle_deflector
 
     @M1_protocol.cmd

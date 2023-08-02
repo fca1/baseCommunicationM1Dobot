@@ -5,7 +5,6 @@ from M1.M1_protocol.M1_protocol import M1_protocol
 
 
 class ProtocolFunctionALARMBase(M1_protocol):
-
     def __init__(self):
         super().__init__()
 
@@ -33,18 +32,18 @@ class ProtocolFunctionALARMBase(M1_protocol):
         return ""
 
     @M1_protocol.cmd
-    def alarm(self) :
+    def alarm(self):
         return M1_msg.build_msg(20), self._decode_alarm
 
     def _decode_alarm(self, msg):
         _id, write, isqueued, payload = M1_msg.decode_msg(msg)
-        index=0
+        index = 0
         for s in payload:
-            if s==0:
-                index+=8
+            if s == 0:
+                index += 8
             else:
                 for j in range(8):
-                    if   s & (1<<j):
+                    if s & (1 << j):
                         return index
-                    index+=1
+                    index += 1
         return 0
