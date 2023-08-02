@@ -30,7 +30,7 @@ class SolderPstar(M1):
         r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\polestar\resource"
     )
     # pointe une fois pour toute sur le PCB
-    ALTITUDE_PCB = 53.8
+    ALTITUDE_PCB = 22
     # en mm
     # Les signes negatifs sont pour le deplacement (selon x+ et y+)
     # Dans le cas présent, la longueur la plus grande du PCB est Y.
@@ -43,7 +43,7 @@ class SolderPstar(M1):
     DIST_BETWEEN_PCB_X = 55
     DIST_BETWEEN_PCB_Y = -20
     # description du connexteur
-    HEIGHT_PIN_SECURITY = 4  # hauteur relative par rapport au PCB
+    HEIGHT_PIN_SECURITY = 2  # hauteur relative par rapport au PCB
 
     OUTPUT_CMD_DISTRIBUTE = (
         18  # Commande pour demander soudure au distributeur (mode pas ble)
@@ -51,7 +51,7 @@ class SolderPstar(M1):
     INPUT_CMD_DISTRIBUTE = 20  # Attente triggger suite ordre par BLE ou commande relay
 
     # Une grille est au dessus du PCB avec une epaisseur de 10mm, cette variable permet de passer cette grille
-    HEIGHT_SHAPE = 10
+    HEIGHT_SHAPE = 5
 
     # En passant par la fonction JUMP, il est possible de pouvoir choisir 2 planchers.
     # Plancher interdisant de varier (X,Y)
@@ -108,6 +108,23 @@ class SolderPstar(M1):
         pass
 
     def cycle_solder_pins(self, initial_point: PositionArm):
+        # point = initial_point.copy()
+        # point.y-=5.2
+        # point.x-=6.9
+        # point.z = self.ALTITUDE_PCB + self.HEIGHT_PIN_SECURITY
+        # positions.add(point)
+        # point = initial_point.copy()
+        # point.y-=14.6
+        # point.x-=7.3
+        # point.z = self.ALTITUDE_PCB + self.HEIGHT_PIN_SECURITY
+        # positions.add(point)
+        # point = initial_point.copy()
+        # point.y-=4
+        # point.x-=49
+        # point.z = self.ALTITUDE_PCB + self.HEIGHT_PIN_SECURITY
+        # positions.add(point)
+
+
         positions = set()
         for x in range(self.MATRIX_INSIDE_CONNECTOR[0]):
             for y in range(self.MATRIX_INSIDE_CONNECTOR[1]):
@@ -272,16 +289,16 @@ class SolderPstar(M1):
         self.org_p = self._load_positions()
         pass
 
-    def _load_positions(self,origin_connector: PositionArm) -> dict:
+    def _load_positions(self) -> dict:
         org_p = dict()
         for x in range(self.MATRIX_PCBS_PANEL[0]):
             for y in range(self.MATRIX_PCBS_PANEL[1]):
-                point = origin_connector.copy()
-                point.x += x * self.DIST_BETWEEN_PCB_X
-                point.y += y * self.DIST_BETWEEN_PCB_Y
-                point.z = self.ALTITUDE_PCB + self.HEIGHT_PIN_SECURITY
-                org_p[f"{x}{y}"] = point
-
+                try:
+                    org_p[f"{x}{y}"] = PositionArm.load(
+                        f"{self.PATH_RESOURCE}/pos{x}{y}.pt"
+                    )
+                except Exception as e:
+                    logging.debug(f"File not found : {self.PATH_RESOURCE}/pos{x}{y}.pt")
         return org_p
 
     def _origin_connector(self, connector_x: int, connector_y: int) -> PositionArm:
@@ -299,6 +316,14 @@ def show_home_solder():
     solder.setHome()
 
 
+def patch_position_connector(solder: SolderEcolow):
+    connector_x = 1
+    connector_y = 4
+    org_p = solder._load_positions()
+    pt = org_p[f"{connector_x}{connector_y}"]
+    pt += PositionArm(-1, 0, 0, 0)
+    pt.save(f"{solder.PATH_RESOURCE}/pos{connector_x}{connector_y}.pt")
+
 
 if __name__ == "__main__":
     solder = SolderPstar(home=True)
@@ -306,7 +331,7 @@ if __name__ == "__main__":
     # show_home_solder()
     # Pointe approximativement vers pcb connecterur
     origin_connector = PositionArm(
-        126.62, -118.38, solder.ALTITUDE_PCB, -90
+        100.0, +50, solder.ALTITUDE_PCB, -90
     )  # @TODO initialiser avec valeur
 
     solder.manage_position_pcbs(origin_connector)
