@@ -159,9 +159,12 @@ class SolderPstar(M1):
 
 
 
+        current = PositionArm(0,1000,0)
+
+
+        self.distrib.distribute(45, 1400, timeout_ms=None)
 
         while positions_pin:
-            current = self.pos
             point = sorted(positions_pin, key=current.distance)[0]
             positions_pin.remove(point)
             self.protocol.ptpBase.queued.setPtpCommonParams(80, 80)
@@ -172,6 +175,7 @@ class SolderPstar(M1):
                 )
             )
             self.cycle_solder_pins(point)
+            current = self.pos
         pass
 
     def cycle_solder_distribute(self, wett: bool = False) -> None:
@@ -202,7 +206,6 @@ class SolderPstar(M1):
         # Retirer  x  1mm (pour amener la panne en diagonale)
         point.x -= self.DIAGONAL
         point.z = self.ALTITUDE_PCB
-        self.distrib.distribute(45, 250, timeout_ms=None)
         #self.cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
         try:
             self.wait_end_queue(
@@ -213,13 +216,16 @@ class SolderPstar(M1):
         finally:
             self.protocol.ptpBase.queued.setPtpCommonParams(80, 80)
             point = initial_point.copy()
-            self.distrib.distribute(35, 500, timeout_ms=0)
+            #self.distrib.distribute(35, 500, timeout_ms=0)
             time.sleep(1)
+
             self.wait_end_queue(
                 self.protocol.armOrientationBase.queued.setPTPCmd(
                     point, E_ptpMode.MOVJ_XYZ
                 )
             )
+            self.distrib.distribute(45, 700, timeout_ms=None)
+
         pass
 
     def cycle_clean_solder(self) -> None:
@@ -328,7 +334,7 @@ if __name__ == "__main__":
     # show_home_solder()
     # Pointe approximativement vers pcb connecterur
     origin_connector = PositionArm(
-        100.0-6.9, +50-5.7, solder.ALTITUDE_PCB, -90
+        100.0-2, +50-6.7, solder.ALTITUDE_PCB, -90
     )  # @TODO initialiser avec valeur
 
     solder.manage_position_pcbs(origin_connector)
