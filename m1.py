@@ -11,7 +11,7 @@ class M1:
     MAX_HEIGHT = 234
     PT_EXTENDED = (400, 0, MAX_HEIGHT, 0)
 
-    def __init__(self, ip_addr="192.168.0.55"):
+    def __init__(self, ip_addr="192.168.1.60"):
         self.protocol = CommProtocolM1(ip_addr)
         self.protocol.setTimeout(5)
         self.initialAngleDefector = 0

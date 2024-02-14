@@ -120,5 +120,5 @@ class BleOrderDistrib:
 if __name__ == "__main__":
     distrib = BleOrderDistrib(400)
     distrib.scan_and_connect()
-    distrib.distribute(-100, 1000, -100, 100, 100, 200, timeout_ms=2000)
+    distrib.distribute(-100, 1000, -100, 100, 100, 200, timeout_ms=20000)
     pass

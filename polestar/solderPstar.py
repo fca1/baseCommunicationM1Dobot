@@ -6,12 +6,15 @@ import os
 # path_root = r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\3dconnexion\dll\x64"
 # os.environ['PATH'] += path_root
 
+_logger = logging.getLogger(__name__)
+_logger.level = logging.DEBUG
+logging.basicConfig(format="%(asctime)s\t:%(message)s")
+
 
 import winsound
 
 from M1.M1_protocol.ProtocolFunctionArmOrientationBase import E_ptpMode
 from M1.misc.PositionArm import PositionArm
-from jog3dconnexion import JogM1
 from m1 import M1
 from solder_distribute.simplepyble_dir.syncBleOrderDistrib import BleOrderDistrib
 
@@ -61,7 +64,7 @@ class SolderPstar(M1):
     # Le needle est sur le centre pin connecteur, cet offset permet le decalage sur la pin1 de chaque connecteur
     OFFSET_POINT = PositionArm(0, 0)
 
-    def __init__(self, ip_addr="192.168.0.55", home=False):
+    def __init__(self, ip_addr="192.168.1.60", home=False):
         # Communication avec le dobot M1
         super().__init__(ip_addr=ip_addr)
         self.distrib = BleOrderDistrib()
@@ -89,7 +92,7 @@ class SolderPstar(M1):
             if not self.distrib.scan_and_connect():
                 raise Exception("Impossible de se connecter au distributeur soudure")
         except Exception as e:
-            logging.error(e)
+            _logger.error(e)
             sys.exit(1)
 
     def _init_io(self):
@@ -186,11 +189,11 @@ class SolderPstar(M1):
         if not wett:
             time.sleep(2)
             if not self.distrib.distribute(35, 1000, timeout_ms=0):
-                logging.error("Probleme de distribution de soudure")
+                _logger.error("Probleme de distribution de soudure")
             time.sleep(2)
         else:
             if not self.distrib.distribute(30, 1000, timeout_ms=None):
-                logging.error("Probleme de distribution de soudure")
+                _logger.error("Probleme de distribution de soudure")
 
     def cycle_solder_wait_distributed(self, timeout_ms=None) -> bool:
         return self.distrib.wait_end_distribute(timeout_ms)
@@ -301,7 +304,7 @@ class SolderPstar(M1):
                         f"{self.PATH_RESOURCE}/pos{x}{y}.pt1"
                     )
                 except Exception as e:
-                    logging.debug(f"File not found : {self.PATH_RESOURCE}/pos{x}{y}.pt")
+                    _logger.debug(f"File not found : {self.PATH_RESOURCE}/pos{x}{y}.pt")
         return org_p
 
     def _origin_connector(self, connector_x: int, connector_y: int) -> PositionArm:
@@ -347,6 +350,9 @@ if __name__ == "__main__":
             break
         # solder.cycle_clean_solder()
         # solder._cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
-        solder.cycle_solder_board()
+        try:
+            solder.cycle_solder_board()
+        except Exception as e:
+            _logger.error(e)
         solder.setHome()
     pass
