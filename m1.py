@@ -51,6 +51,7 @@ class M1:
             if reason:
                 print(f"Erreur sur le M1: error ={reason}")
                 self.protocol.alarmBase.clearAllAlarmsState()
+                self.protocol.homeBase.setHome()
             serial = self.protocol.serial()
             return bool(serial)
         except Exception as e:

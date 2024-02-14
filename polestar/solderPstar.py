@@ -1,7 +1,10 @@
 import logging
+import math
 import sys
 import time
 import os
+
+from polestar.detect_circle_contour import measure_position_center_normalized
 
 # path_root = r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\3dconnexion\dll\x64"
 # os.environ['PATH'] += path_root
@@ -11,7 +14,6 @@ _logger.level = logging.DEBUG
 logging.basicConfig(format="%(asctime)s\t:%(message)s")
 
 
-import winsound
 
 from M1.M1_protocol.ProtocolFunctionArmOrientationBase import E_ptpMode
 from M1.misc.PositionArm import PositionArm
@@ -30,7 +32,8 @@ class SolderPstar(M1):
 
     # Les fichiers de sauvegarde de position connecteur sont dans ce repertoire
     PATH_RESOURCE = (
-        r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\polestar\resource"
+#        r"C:\Users\EPI\PycharmProjects\baseCommunicationM1Dobot\polestar\resource"
+        r"/home/fc/PycharmProjects/m1/polestar/resource"
     )
     # pointe une fois pour toute sur le PCB
     ALTITUDE_PCB = 21.5
@@ -110,7 +113,46 @@ class SolderPstar(M1):
         )
         pass
 
+    def correct_by_camera(self,pads_to_detect,enable:bool=False)->set:
+        """
+        Positionne la camera au dessus des points et detecte si la position est correcte,
+        :param pads_to_detect: Les pads à detecter.
+        :param enable: False, pour rendre les points comme originaux
+        :return: Les points corriges par la camera.
+        """
+        LIMIT_NORME = 0.05
+        SCALE_CAMERA_XY = 1
+        if not enable:
+            return pads_to_detect
+        pads_modified=set()
+        for point in pads_to_detect:
+            # positionner la camera dessus.
+            pointModified =point.copy()
+            while True:
+                self.protocol.armOrientationBase.queued.setPTPCmd(pointModified, E_ptpMode.MOVJ_XYZ)
+                cRxy = measure_position_center_normalized()
+                if cRxy is None:
+                    logging.warning("Impossible de trouver le centre")
+                else:
+                    # Si proche du centre
+                    norme = math.sqrt(cRxy[0]*cRxy[0]+cRxy[1]*cRxy[1])
+                    if norme <= LIMIT_NORME:
+                        pads_modified|=pointModified
+                        break
+                    # proceder selon un zoom deifini par la camera au correctif
+                    pointModified.x += cRxy[0]*SCALE_CAMERA_XY
+                    pointModified.Y += cRxy[1] * SCALE_CAMERA_XY
+        return pads_modified
+
+
+
     def cyle_compute_solder_pins(self,positions:set,initial_point: PositionArm)->set:
+        """
+
+        :param positions:
+        :param initial_point:  1 seul point est donné, les 2 autres points sont tires du gerber.
+        :return: Les 3 points calculés
+        """
         point = initial_point.copy()
         # point.x += x * self.DIST_BETWEEN_PINS_X
         # point.y += y * self.DIST_BETWEEN_PINS_Y
@@ -158,7 +200,10 @@ class SolderPstar(M1):
         # recceuilir toutes les positions
         positions_pin=set()
         for position in positions:
-            positions_pin|=self.cyle_compute_solder_pins(positions_pin,position)
+            # pour chaque position d'un point PCB, les 2 autres sont déduits
+            pad_pcbs =self.cyle_compute_solder_pins(positions_pin, position)
+            pad_pcbs_modified = self.cycle.correct_by_camera(pad_pcbs,enable=True)
+            positions_pin|=pad_pcbs_modified
 
 
 
@@ -275,7 +320,7 @@ class SolderPstar(M1):
         self.wait_end_queue(
             self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.JUMP_XYZ)
         )
-        winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
+        #winsound.MessageBeep(winsound.MB_ICONEXCLAMATION)
         time.sleep(3)
         self.protocol.hhtBase.setHttTrigOutputEnabled(True)
         input(f"positionner le needle ({connector_x}{connector_y})")
@@ -344,7 +389,7 @@ if __name__ == "__main__":
 
     while True:
         while True:
-            winsound.Beep(440, 300)
+            #winsound.Beep(440, 300)
             time.sleep(0.5)
             input("go")
             break

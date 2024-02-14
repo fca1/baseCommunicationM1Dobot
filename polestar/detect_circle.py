@@ -1,19 +1,20 @@
+import time
+
 import cv2
 import numpy as np
 
 # Read image.
 # define a video capture object
-vid = cv2.VideoCapture(1)
-
+vid = cv2.VideoCapture(-1)
 
 # Capture the video frame
 # by frame
 ret, frame = vid.read()
-
-# Display the resulting frame
-cv2.imshow('frame', frame)
-
-
+if ret:
+	# Display the resulting frame
+	#cv2.imshow('frame', frame)
+	#cv2.waitKey(30)
+	pass
 img = frame
 
 # Convert to grayscale.
@@ -25,7 +26,7 @@ gray_blurred = cv2.blur(gray, (3, 3))
 # Apply Hough transform on the blurred image.
 detected_circles = cv2.HoughCircles(gray_blurred,
 				cv2.HOUGH_GRADIENT, 1, 120, param1 = 50,
-			param2 = 70, minRadius = 20, maxRadius = 40)
+			param2 = 70, minRadius = 0, maxRadius = 0)
 
 # Draw circles that are detected.
 if detected_circles is not None:
@@ -42,4 +43,4 @@ if detected_circles is not None:
 		# Draw a small circle (of radius 1) to show the center.
 		cv2.circle(img, (a, b), 1, (0, 0, 255), 3)
 		cv2.imshow("Detected Circle", img)
-		cv2.waitKey(0)
+		cv2.waitKey(30)
