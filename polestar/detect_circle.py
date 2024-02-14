@@ -5,42 +5,55 @@ import numpy as np
 
 # Read image.
 # define a video capture object
-vid = cv2.VideoCapture(-1)
 
-# Capture the video frame
-# by frame
-ret, frame = vid.read()
-if ret:
-	# Display the resulting frame
-	#cv2.imshow('frame', frame)
-	#cv2.waitKey(30)
-	pass
-img = frame
 
-# Convert to grayscale.
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+def _measure_position_center_normalized(show=True) -> tuple:
+	vid = cv2.VideoCapture(-1)
 
-# Blur using 3 * 3 kernel.
-gray_blurred = cv2.blur(gray, (3, 3))
+	# Capture the video frame
+	# by frame
+	ret, frame = vid.read()
+	if ret:
+		# Display the resulting frame
+		#cv2.imshow('frame', frame)
+		#cv2.waitKey(30)
+		pass
+	img = frame
 
-# Apply Hough transform on the blurred image.
-detected_circles = cv2.HoughCircles(gray_blurred,
-				cv2.HOUGH_GRADIENT, 1, 120, param1 = 50,
-			param2 = 70, minRadius = 0, maxRadius = 0)
+	# Convert to grayscale.
+	gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-# Draw circles that are detected.
-if detected_circles is not None:
+	# Blur using 3 * 3 kernel.
+	gray_blurred = cv2.blur(gray, (3, 3))
 
-	# Convert the circle parameters a, b and r to integers.
-	detected_circles = np.uint16(np.around(detected_circles))
+	# Apply Hough transform on the blurred image.
+	detected_circles = cv2.HoughCircles(gray_blurred,
+					cv2.HOUGH_GRADIENT, 1, 250, param1 = 30,
+				param2 = 40, minRadius = 50, maxRadius = 80)
 
-	for pt in detected_circles[0, :]:
-		a, b, r = pt[0], pt[1], pt[2]
+	# Draw circles that are detected.
+	if detected_circles is not None:
 
-		# Draw the circumference of the circle.
-		cv2.circle(img, (a, b), r, (0, 255, 0), 2)
+		# Convert the circle parameters a, b and r to integers.
+		detected_circles = np.uint16(np.around(detected_circles))
 
-		# Draw a small circle (of radius 1) to show the center.
-		cv2.circle(img, (a, b), 1, (0, 0, 255), 3)
+		for pt in detected_circles[0, :]:
+			a, b, r = pt[0], pt[1], pt[2]
+			print(a,b,r)
+			# Draw the circumference of the circle.
+			cv2.circle(img, (a, b), r, (0, 255, 0), 2)
+
+			# Draw a small circle (of radius 1) to show the center.
+			cv2.circle(img, (a, b), 1, (0, 0, 255), 3)
+	rY, rX ,_= img.shape
+	if show:
 		cv2.imshow("Detected Circle", img)
-		cv2.waitKey(30)
+		cv2.waitKey(0)
+		cv2.destroyAllWindows()
+
+	print("finish")
+	return None if detected_circles is  None else (2*(a/rX-0.5),2*(b/rY-0.5))
+
+if __name__ == "__main__":
+    cXY = _measure_position_center_normalized(True)
+    pass

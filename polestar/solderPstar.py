@@ -121,7 +121,7 @@ class SolderPstar(M1):
         :return: Les points corriges par la camera.
         """
         LIMIT_NORME = 0.05
-        SCALE_CAMERA_XY = 1
+        SCALE_CAMERA_XY = 5
         if not enable:
             return pads_to_detect
         pads_modified=set()
@@ -129,10 +129,13 @@ class SolderPstar(M1):
             # positionner la camera dessus.
             pointModified =point.copy()
             while True:
-                self.protocol.armOrientationBase.queued.setPTPCmd(pointModified, E_ptpMode.MOVJ_XYZ)
+                self.wait_end_queue(
+                self.protocol.armOrientationBase.queued.setPTPCmd(pointModified, E_ptpMode.MOVJ_XYZ))
+
                 cRxy = measure_position_center_normalized()
                 if cRxy is None:
                     logging.warning("Impossible de trouver le centre")
+                    time.sleep(.1)
                 else:
                     # Si proche du centre
                     norme = math.sqrt(cRxy[0]*cRxy[0]+cRxy[1]*cRxy[1])
@@ -141,7 +144,7 @@ class SolderPstar(M1):
                         break
                     # proceder selon un zoom deifini par la camera au correctif
                     pointModified.x += cRxy[0]*SCALE_CAMERA_XY
-                    pointModified.Y += cRxy[1] * SCALE_CAMERA_XY
+                    pointModified.y += cRxy[1] * SCALE_CAMERA_XY
         return pads_modified
 
 
@@ -202,7 +205,7 @@ class SolderPstar(M1):
         for position in positions:
             # pour chaque position d'un point PCB, les 2 autres sont déduits
             pad_pcbs =self.cyle_compute_solder_pins(positions_pin, position)
-            pad_pcbs_modified = self.cycle.correct_by_camera(pad_pcbs,enable=True)
+            pad_pcbs_modified = self.correct_by_camera(pad_pcbs,enable=True)
             positions_pin|=pad_pcbs_modified
 
 

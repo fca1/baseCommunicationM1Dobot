@@ -32,6 +32,23 @@ class BleOrderDistrib:
         self.event.set()
         pass
 
+    def _connect(self,enabled=True):
+        if enabled:
+            try:
+                _logger.info(f"candidate: {self.peripheral.rssi()}dBm")
+                self.peripheral.connect()
+                _logger.debug(f"connected {self.peripheral.rssi()}dBm")
+                self.peripheral.notify(
+                    self.service_uuid,
+                    self.characteristic_uuid,
+                    lambda data: self._notified(data),
+                )
+            except RuntimeError as e:
+                _logger.warning("impossible de se connecter BLE")
+                return False
+            _logger.debug(f"Ble is ready")
+        else:
+            self.peripheral.disconnect()
     def scan_and_connect(self) -> bool:
         if self.peripheral:
             if self.peripheral.is_connected():
@@ -51,19 +68,6 @@ class BleOrderDistrib:
                 if peripherals:
                     break
             self.peripheral = peripherals[0]
-            try:
-                _logger.info(f"candidate: {self.peripheral.rssi()}dBm")
-                self.peripheral.connect()
-                _logger.debug(f"connected {self.peripheral.rssi()}dBm")
-                self.peripheral.notify(
-                    self.service_uuid,
-                    self.characteristic_uuid,
-                    lambda data: self._notified(data),
-                )
-            except RuntimeError as e:
-                _logger.warning("impossible de se connecter BLE")
-                return False
-            _logger.debug(f"Ble is ready")
             return True
 
     def wait_end_distribute(self, timeout_ms: int = 0) -> bool:
