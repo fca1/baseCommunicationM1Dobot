@@ -32,6 +32,7 @@ class M1:
         while reason := self.protocol.alarm:
             logging.warning(f"Erreur sur le M1: error ={reason}")
             self.protocol.alarmBase.clearAllAlarmsState()
+            self.protocol.homeBase.setHome()
         # Nettoyer la queue de messages
         self.protocol.queueCmdBase.setQueuedCmdForceStopExec()
         self.protocol.queueCmdBase.setQueuedCmdClear()
@@ -52,6 +53,7 @@ class M1:
                 print(f"Erreur sur le M1: error ={reason}")
                 self.protocol.alarmBase.clearAllAlarmsState()
                 self.protocol.homeBase.setHome()
+                reason = self.protocol.alarm
             serial = self.protocol.serial()
             return bool(serial)
         except Exception as e:

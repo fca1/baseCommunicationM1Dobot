@@ -68,6 +68,7 @@ class BleOrderDistrib:
                 if peripherals:
                     break
             self.peripheral = peripherals[0]
+            self._connect(True)
             return True
 
     def wait_end_distribute(self, timeout_ms: int = 0) -> bool:
@@ -75,6 +76,7 @@ class BleOrderDistrib:
         return self.event.wait(timeout=timeout_ms / 1000)
 
     def distribute(self, *datas, timeout_ms: int = None) -> bool:
+
         """
         valeurs par binome, comprenant la vitesse de -100% a 100% et le temps. Par exemple, 100,200,-100,50 va apporter de la soudure pendant 200ms et la retracter pendant 50ms
         :param datas:
