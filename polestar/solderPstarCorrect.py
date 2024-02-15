@@ -192,7 +192,7 @@ if __name__ == "__main__":
     #show_home_solder()
     # Pointe approximativement vers pcb connecterur
     solder.cycle_compute_solder_board(enable=True,x0=None,y0=None)
-
+    solder.setHome()
     while True:
         while True:
             #winsound.Beep(440, 300)
@@ -205,5 +205,6 @@ if __name__ == "__main__":
             solder.manage_position_pcbs()
         except Exception as e:
             _logger.error(e)
-        solder.setHome()
+        finally:
+            solder.setHome()
     pass

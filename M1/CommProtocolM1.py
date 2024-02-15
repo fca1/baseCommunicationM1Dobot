@@ -6,6 +6,7 @@ from M1.misc.PositionArm import PositionArm
 
 
 class CommProtocolM1(M1_comm_udp, ProtocolFunction):
+    NBER_ATTEMPTS = 2
     def __init__(self, addr: str, port: int = 12345):
         M1_comm_udp.__init__(self, addr, port)
         ProtocolFunction.__init__(self)
@@ -26,7 +27,17 @@ class CommProtocolM1(M1_comm_udp, ProtocolFunction):
             if not isinstance(msg_or_tuple, bytes)
             else (msg_or_tuple, None)
         )
-        answer = self.send_msg(x)
+        answer = None
+        error = None
+        for attempt in range(self.NBER_ATTEMPTS):
+            try:
+                answer = self.send_msg(x)
+                error = None
+                break
+            except TimeoutError as error:
+                pass
+        if error:
+            raise error
         if decode_fcnt:
             return decode_fcnt(answer)
         return answer

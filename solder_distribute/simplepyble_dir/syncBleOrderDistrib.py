@@ -24,6 +24,7 @@ class BleOrderDistrib:
         self.bias = bias
         self._forward = False
 
+
     def setBias(self, value_ms: int):
         self.bias = value_ms
 

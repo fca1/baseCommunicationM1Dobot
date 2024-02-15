@@ -29,7 +29,7 @@ class SolderPstar(M1):
     """
 
     # pointe une fois pour toute sur le PCB
-    ALTITUDE_PCB = 21.5
+    ALTITUDE_PCB = 17.5
     # en mm
     # Les signes negatifs sont pour le deplacement (selon x+ et y+)
     # Dans le cas présent, la longueur la plus grande du PCB est Y.
@@ -58,7 +58,7 @@ class SolderPstar(M1):
     #  Lors de la descente sur la pin, fait varier selon une pente (HEIGHT_PIN_SECURITY/DIAGONAL)
     DIAGONAL = 0
     # Le needle est sur le centre pin connecteur, cet offset permet le decalage sur la pin1 de chaque connecteur
-    OFFSET_POINT = PositionArm(x=-3.5,y=-1)
+    OFFSET_POINT = PositionArm(x=-2.5,y=-1)
 
     # Nbre de points (pad) par carte
     NBER_PAD = 3
@@ -193,7 +193,7 @@ class SolderPstar(M1):
                     point, E_ptpMode.MOVJ_XYZ
                 )
             )
-            self.distrib.distribute(45, 700, timeout_ms=None)
+            self.distrib.distribute(45, 800, timeout_ms=None)
 
         pass
 
