@@ -39,7 +39,7 @@ class BleOrderDistrib:
                 _logger.info(f"candidate: {self.peripheral.rssi()}dBm")
                 self.peripheral.connect()
                 _logger.debug(f"connected {self.peripheral.rssi()}dBm")
-                self.peripheral.notify(
+                self.peripheral.indicate(
                     self.service_uuid,
                     self.characteristic_uuid,
                     lambda data: self._notified(data),
