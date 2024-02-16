@@ -143,10 +143,10 @@ class SolderPstarCorrect(SolderPstar):
         point.save(f"{self.PATH_RESOURCE}/pos{connector_x}{connector_y}_{nber_pad}.pt")
         return point
 
-    def manage_position_pcbs(self):
+    def manage_position_pcbs(self,skip_solder:int):
         # Charger toutes les positions en memoire RAM
         setti = set(self.org_p.values())
-        self.cycle_solder_board(setti)
+        self.cycle_solder_board(setti,skip_solder)
         pass
 
     def _load_positions(self) -> dict:
@@ -193,18 +193,26 @@ if __name__ == "__main__":
     # Pointe approximativement vers pcb connecterur
     solder.cycle_compute_solder_board(enable=True,x0=None,y0=None)
     solder.setHome()
-    while True:
+    try:
         while True:
-            #winsound.Beep(440, 300)
-            time.sleep(0.5)
-            input("go")
-            break
-        # solder.cycle_clean_solder()
-        # solder._cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
-        try:
-            solder.manage_position_pcbs()
-        except Exception as e:
-            _logger.error(e)
-        finally:
-            solder.setHome()
-    pass
+            while True:
+                #winsound.Beep(440, 300)
+                time.sleep(0.5)
+                v = input("go")
+                if not v:
+                    skip=0
+                else:
+                    skip=int(v)
+                break
+            # solder.cycle_clean_solder()
+            # solder._cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
+            try:
+                solder.manage_position_pcbs(skip)
+
+            except Exception as e:
+                _logger.error(e)
+            finally:
+                solder.setHome()
+        pass
+    finally:
+        solder.distrib._connect(False)

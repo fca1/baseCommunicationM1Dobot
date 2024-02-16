@@ -29,7 +29,7 @@ class SolderPstar(M1):
     """
 
     # pointe une fois pour toute sur le PCB
-    ALTITUDE_PCB = 17.5
+    ALTITUDE_PCB = 17.2
     # en mm
     # Les signes negatifs sont pour le deplacement (selon x+ et y+)
     # Dans le cas présent, la longueur la plus grande du PCB est Y.
@@ -58,7 +58,7 @@ class SolderPstar(M1):
     #  Lors de la descente sur la pin, fait varier selon une pente (HEIGHT_PIN_SECURITY/DIAGONAL)
     DIAGONAL = 0
     # Le needle est sur le centre pin connecteur, cet offset permet le decalage sur la pin1 de chaque connecteur
-    OFFSET_POINT = PositionArm(x=-2.5,y=-1)
+    OFFSET_POINT = PositionArm(x=-2.5,y=-1.5)
 
     # Nbre de points (pad) par carte
     NBER_PAD = 3
@@ -115,13 +115,14 @@ class SolderPstar(M1):
         self.protocol.ptpBase.queued.setPtpCommonParams(80, 80)
         # se décaler de 1mm en x pour venir en diagonale
         point.x += self.DIAGONAL
+
         self.protocol.armOrientationBase.queued.setPTPCmd(point, E_ptpMode.MOVJ_XYZ)
         self.cycle_solder_pin(point)
         pass
 
 
 
-    def cycle_solder_board(self, positions_pinRef:set):
+    def cycle_solder_board(self, positions_pinRef:set,skip_solder = 0):
         positions_pin=positions_pinRef.copy()
 
 
@@ -129,21 +130,24 @@ class SolderPstar(M1):
         current = PositionArm(0,1000,0)
 
 
-        self.distrib.distribute(45, 1400, timeout_ms=None)
+        self.distrib.distribute(45, 800, timeout_ms=None)
 
         while positions_pin:
             point = sorted(positions_pin, key=current.distance)[0]
             positions_pin.remove(point)
             point+= self.OFFSET_POINT
-            self.protocol.ptpBase.queued.setPtpCommonParams(40, 40)
-            # En mode jump, l'altitude de déplacement est SHAPE
-            self.wait_end_queue(
-                self.protocol.armOrientationBase.queued.setPTPCmd(
-                    point, E_ptpMode.JUMP_XYZ
+            if not skip_solder:
+                self.protocol.ptpBase.queued.setPtpCommonParams(40, 40)
+                # En mode jump, l'altitude de déplacement est SHAPE
+                self.wait_end_queue(
+                    self.protocol.armOrientationBase.queued.setPTPCmd(
+                        point, E_ptpMode.JUMP_XYZ
+                    )
                 )
-            )
-            self.cycle_solder_pins(point)
-            current = self.pos
+                self.cycle_solder_pins(point)
+            else:
+                skip_solder-=1
+            current = point
         pass
 
     def cycle_solder_distribute(self, wett: bool = False) -> None:
@@ -176,6 +180,7 @@ class SolderPstar(M1):
         point.x -= self.DIAGONAL
         point.z = self.ALTITUDE_PCB
         #self.cycle_solder_distribute(True)  # Mettre de la soudure sur le fer
+        self.distrib.distribute(70, 700, timeout_ms=None)
         try:
             self.wait_end_queue(
                 self.protocol.armOrientationBase.queued.setPTPCmd(
@@ -186,14 +191,13 @@ class SolderPstar(M1):
             self.protocol.ptpBase.queued.setPtpCommonParams(80, 80)
             point = initial_point.copy()
             #self.distrib.distribute(35, 500, timeout_ms=0)
-            time.sleep(1)
+
 
             self.wait_end_queue(
                 self.protocol.armOrientationBase.queued.setPTPCmd(
                     point, E_ptpMode.MOVJ_XYZ
                 )
             )
-            self.distrib.distribute(45, 800, timeout_ms=None)
 
         pass
 
